@@ -17,8 +17,7 @@ class CommandRouter(
     fun coCommandRouter() = coRouter {
         (accept(APPLICATION_JSON) and "/slash-command").nest {
             headers { "1.0" in it.header("Version") }.nest {
-                GET("", commandHandler::getCommand)
-                POST("", commandHandler::addCommand)
+                POST("/blind-vote", commandHandler::hi)
             }
         }
     }

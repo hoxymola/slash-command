@@ -1,12 +1,15 @@
 package dev.weekend.slashcommand.presentation
 
-import dev.weekend.slashcommand.application.CommandService
+import dev.weekend.slashcommand.domain.enums.ResponseType.EPHEMERAL
+import dev.weekend.slashcommand.presentation.model.CommandResponse
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.reactive.function.server.ServerResponse.ok
+import org.springframework.web.reactive.function.server.awaitBody
 import org.springframework.web.reactive.function.server.bodyValueAndAwait
-import org.springframework.web.reactive.function.server.queryParamOrNull
 
 /**
  * @author Jaeguk Cho
@@ -14,21 +17,16 @@ import org.springframework.web.reactive.function.server.queryParamOrNull
 
 @Component
 class CommandHandler(
-    private val commandService: CommandService,
 ) {
-    suspend fun getCommand(request: ServerRequest): ServerResponse {
-        val commandNo = request.queryParamOrNull("commandNo")!!.toLong()
+    suspend fun hi(request: ServerRequest): ServerResponse {
+        return withContext(Dispatchers.Default) {
+            val hiRequest = request.awaitBody<CommandHandler>()
+            val hiResponse = CommandResponse(
+                text = "Hello, World!",
+                responseType = EPHEMERAL.value,
+            )
 
-        return commandService.getCommand(
-            commandNo = commandNo,
-        ).let { ok().bodyValueAndAwait(it) }
-    }
-
-    suspend fun addCommand(request: ServerRequest): ServerResponse {
-        val commandName = request.queryParamOrNull("commandName")!!
-
-        return commandService.addCommand(
-            commandName = commandName,
-        ).let { ok().bodyValueAndAwait(it) }
+            ok().bodyValueAndAwait(hiResponse)
+        }
     }
 }
