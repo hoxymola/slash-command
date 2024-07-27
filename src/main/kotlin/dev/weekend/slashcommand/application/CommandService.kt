@@ -45,9 +45,9 @@ class CommandService(
         ).let { blindVoteRepository.save(it) }
 
         val voteItems = listOf(
-            BlindVoteItem.createBy("짜장면", vote),
-            BlindVoteItem.createBy("짬뽕", vote),
-            BlindVoteItem.createBy("탕수육", vote),
+            BlindVoteItem.createBy(vote, "짜장면"),
+            BlindVoteItem.createBy(vote, "짬뽕"),
+            BlindVoteItem.createBy(vote, "탕수육"),
         ).let { blindVoteItemRepository.saveAll(it) }
 
         return CommandResponse.createFormBy(
@@ -59,76 +59,150 @@ class CommandService(
     fun updateBlindVote(
         request: VoteUpdateRequest,
     ): CommandResponse {
-        return when (request.actionName) {
-            CHANGE_TITLE -> request.changeTitle() // 기존폼 + 제목 수정
-            ADD_ITEM -> request.addItem() // 기존폼 + 항목 추가
-            CHANGE_ITEM -> request.changeItem() // 기존폼 + 항목 수정
-            CHANGE_SELECTABLE_ITEM_COUNT -> request.changeSelectableItemCount() // 기존폼 + 선택가능한 개수 수정
+        return when (request.actionName ?: request.submission.keys.first()) {
+            OPEN_TITLE_CHANGE_DIALOG -> request.openTitleChangeDialog()
+            CHANGE_TITLE -> request.changeTitle()
+            OPEN_ITEM_CHANGE_DIALOG -> request.openItemChangeDialog()
+            CHANGE_ITEM -> request.changeItem()
+            OPEN_ITEM_ADD_DIALOG -> request.openItemAddDialog()
+            ADD_ITEM -> request.addItem()
+            CHANGE_SELECTABLE_ITEM_COUNT -> request.changeSelectableItemCount()
             START_VOTE -> request.startVote()
-            CANCEL_VOTE -> CommandResponse.createCancelVote()
+            CANCEL_VOTE -> request.cancelVote()
             CHECK_VOTE -> request.checkVote()
             VOTE -> request.vote()
             END_VOTE -> request.endVote()
         }
     }
 
-    private fun VoteUpdateRequest.changeTitle(): CommandResponse {
+    private fun VoteUpdateRequest.openTitleChangeDialog(): CommandResponse {
         openDialog(
             title = "제목 수정",
             submitLabel = "저장",
             type = CHANGE_TITLE,
         )
 
-        return CommandResponse.createResponse()
+        return CommandResponse.createResponse(
+            text = "제목 수정 버튼을 눌렀을 때~",
+            replaceOriginal = true,
+        )
     }
 
-    private fun VoteUpdateRequest.addItem(): CommandResponse {
+    private fun VoteUpdateRequest.changeTitle(): CommandResponse {
+        transactionTemplate.executeWithoutResult {
+            val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
+
+            vote.updateTitle(submission.getValue(CHANGE_TITLE))
+        }
+
+        return CommandResponse.createResponse(
+            text = "수정할 제목을 입력했을때",
+            replaceOriginal = true,
+        )
+    }
+
+    private fun VoteUpdateRequest.openItemAddDialog(): CommandResponse {
         openDialog(
             title = "항목 추가",
             submitLabel = "저장",
             type = ADD_ITEM,
         )
 
-        return CommandResponse.createResponse()
+        return CommandResponse.createResponse(
+            text = "항목 추가 버튼을 눌렀을 대",
+            replaceOriginal = true,
+        )
     }
 
-    private fun VoteUpdateRequest.changeItem(): CommandResponse {
+    private fun VoteUpdateRequest.addItem(): CommandResponse {
+        transactionTemplate.executeWithoutResult {
+            val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
+            val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo).toMutableList()
+
+            BlindVoteItem.createBy(
+                vote = vote,
+                voteItemName = submission.getValue(ADD_ITEM),
+            ).let { blindVoteItemRepository.save(it) }
+                .also { voteItems.add(it) }
+            vote.updateSelectableItemCnt(voteItems.size)
+        }
+
+        return CommandResponse.createResponse(
+            text = "추가할 항목을 입력했을 때",
+            replaceOriginal = true,
+        )
+    }
+
+    private fun VoteUpdateRequest.openItemChangeDialog(): CommandResponse {
         openDialog(
             title = "항목 수정",
             submitLabel = "저장",
             type = CHANGE_ITEM,
         )
 
-        return CommandResponse.createResponse()
+        return CommandResponse.createResponse(
+            text = "항목 변경 버튼을 눌렀을때",
+            replaceOriginal = true,
+        )
+    }
+
+    private fun VoteUpdateRequest.changeItem(): CommandResponse {
+        transactionTemplate.executeWithoutResult {
+            val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
+            val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo).toMutableList()
+
+            voteItems.first { it.voteItemNo == voteItemNo }
+                .updateName(submission.getValue(CHANGE_ITEM))
+        }
+
+        return CommandResponse.createResponse(
+            text = "변경할 항목을 입력했을 때",
+            replaceOriginal = true,
+        )
     }
 
     private fun VoteUpdateRequest.changeSelectableItemCount(): CommandResponse {
         return transactionTemplate.execute {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
-            val selectableItemCount = actionValue.toInt()
+            val selectableItemCount = actionValue?.toInt() ?: 0
+
             vote.updateSelectableItemCnt(selectableItemCount)
 
             CommandResponse.createFormBy(
                 vote = vote,
                 voteItems = voteItems,
             )
-        } ?: throw IllegalStateException()
+        } ?: CommandResponse.createResponse()
     }
 
     private fun VoteUpdateRequest.startVote(): CommandResponse {
         val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
         val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
-        val voteMembers = blindVoteMemberRepository.findByVoteVoteNo(vote.voteNo)
 
-        return CommandResponse.createVoteBy(
-            vote = vote,
-            voteItems = voteItems,
-            voteMembers = voteMembers,
-            deleteOriginal = true,
-            type = START_VOTE,
-            userId = user.id.toLong(),
-        )
+        return when {
+            vote.voteTitle.isEmpty() -> CommandResponse.createResponse(
+                text = "투표 제목을 입력해 주세요. 🥸",
+                replaceOriginal = false,
+            )
+
+            voteItems.isEmpty() -> CommandResponse.createResponse(
+                text = "투표 항목을 추가해 주세요. 🥸",
+                replaceOriginal = false,
+            )
+
+            else -> CommandResponse.createVoteBy(
+                vote = vote,
+                voteItems = voteItems,
+                deleteOriginal = true,
+                type = START_VOTE,
+                userId = user.id.toLong(),
+            )
+        }
+    }
+
+    private fun VoteUpdateRequest.cancelVote(): CommandResponse {
+        return CommandResponse.createCancelVote()
     }
 
     private fun VoteUpdateRequest.checkVote(): CommandResponse {
@@ -153,14 +227,12 @@ class CommandService(
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
             val voteMembers = blindVoteMemberRepository.findByVoteVoteNo(vote.voteNo).toMutableList()
 
-            val targetItem = voteItems.firstOrNull { it.voteItemNo == actionValue.toLong() }
+            val targetItem = voteItems.first { it.voteItemNo == actionValue?.toLong() }
             val targetMember = voteMembers.firstOrNull {
-                it.userId == user.id.toLong() && it.voteItem.voteItemNo == targetItem?.voteItemNo
+                it.userId == user.id.toLong() && it.voteItem.voteItemNo == targetItem.voteItemNo
             }
 
             if (targetMember == null) {
-                targetItem ?: throw NotFoundException()
-
                 val selectedItemCount = voteMembers.count { it.userId == user.id.toLong() }
 
                 if (vote.selectableItemCnt > selectedItemCount) {
@@ -173,7 +245,7 @@ class CommandService(
                         .also { voteMembers.add(it) }
                 }
             } else {
-                targetItem?.decreaseCnt()
+                targetItem.decreaseCnt()
                 blindVoteMemberRepository.delete(targetMember)
                 voteMembers.remove(targetMember)
             }
@@ -186,7 +258,7 @@ class CommandService(
                 type = VOTE,
                 userId = user.id.toLong(),
             )
-        } ?: throw IllegalStateException()
+        } ?: CommandResponse.createResponse()
     }
 
     private fun VoteUpdateRequest.endVote(): CommandResponse {
@@ -226,7 +298,7 @@ class CommandService(
                     triggerId = triggerId,
                     callbackId = callbackId,
                     dialog = DoorayDialog(
-                        callbackId = callbackId,
+                        callbackId = "$callbackId:$actionValue",
                         title = title,
                         submitLabel = submitLabel,
                         elements = listOf(

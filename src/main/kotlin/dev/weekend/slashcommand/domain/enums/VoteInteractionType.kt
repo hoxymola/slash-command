@@ -5,9 +5,12 @@ package dev.weekend.slashcommand.domain.enums
  */
 
 enum class VoteInteractionType {
+    OPEN_TITLE_CHANGE_DIALOG,
     CHANGE_TITLE,
-    ADD_ITEM,
+    OPEN_ITEM_CHANGE_DIALOG,
     CHANGE_ITEM,
+    OPEN_ITEM_ADD_DIALOG,
+    ADD_ITEM,
     CHANGE_SELECTABLE_ITEM_COUNT,
     START_VOTE,
     CANCEL_VOTE,
