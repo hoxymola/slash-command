@@ -81,6 +81,7 @@ class CommandService(
                 title = "제목 수정",
                 submitLabel = "저장",
                 type = CHANGE_TITLE,
+                value = vote.voteTitle,
             )
         }
 
