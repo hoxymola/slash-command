@@ -169,7 +169,7 @@ data class CommandResponse(
                         }.map { item ->
                             DoorayField(
                                 title = item.voteItemName + " 🥇".takeIf { isGoldMedal(item.voteCnt) }.orEmpty(),
-                                value = vote.voteEmoji.emoji.repeat(item.voteCnt).takeIf { it.isNotEmpty() } ?: " ",
+                                value = "${vote.voteEmoji.emoji.repeat(item.voteCnt)} (${item.voteCnt})",
                             )
                         },
                     ),
