@@ -8,13 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository
  */
 
 interface BlindVoteMemberRepository : JpaRepository<BlindVoteMember, Long> {
-    fun findByVoteItemNoAndUserId(
-        voteItemNo: Long,
-        userId: Long,
-    ): BlindVoteMember?
-
     fun countByVoteVoteNoAndUserId(
         voteNo: Long,
         userId: Long,
     ): Int
+
+    fun findByVoteVoteNo(
+        voteNo: Long,
+    ): List<BlindVoteMember>
 }
