@@ -177,8 +177,8 @@ data class CommandResponse(
                         callbackId = "${vote.voteNo}",
                         fields = voteItems.let { items ->
                             when (type) {
-                                END_VOTE -> items.sortedBy { it.voteItemNo }
-                                else -> items.sortedByDescending { it.voteCnt }
+                                END_VOTE -> items.sortedByDescending { it.voteCnt }
+                                else -> items.sortedBy { it.voteItemNo }
                             }
                         }.map { item ->
                             DoorayField(
