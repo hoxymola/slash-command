@@ -11,6 +11,7 @@ enum class VoteInteractionType {
     CHANGE_SELECTABLE_ITEM_COUNT,
     START_VOTE,
     CANCEL_VOTE,
+    CHECK_VOTE,
     VOTE,
     END_VOTE,
     ;

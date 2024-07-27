@@ -5,6 +5,7 @@ import dev.weekend.slashcommand.domain.entity.BlindVoteItem
 import dev.weekend.slashcommand.domain.entity.BlindVoteMember
 import dev.weekend.slashcommand.domain.enums.DoorayActionType.SELECT
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.PRIMARY
+import dev.weekend.slashcommand.domain.enums.DoorayResponseType
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.EPHEMERAL
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.IN_CHANNEL
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType
@@ -123,21 +124,38 @@ data class CommandResponse(
             vote: BlindVote,
             voteItems: List<BlindVoteItem>,
             voteMembers: List<BlindVoteMember>,
+            responseType: DoorayResponseType = IN_CHANNEL,
             replaceOriginal: Boolean? = null,
             deleteOriginal: Boolean? = null,
             type: VoteInteractionType,
+            userId: Long,
+            channelId: String? = null, // 훅으로 보낼 땐 필수
         ): CommandResponse {
             val emoji = emojiList[vote.voteNo.toInt() % emojiList.size]
+            val myVote = voteMembers.filter { it.userId == userId }
+                .sortedBy { it.voteItem.voteItemNo }
+                .joinToString(" / ") { it.voteItem.voteItemName }
 
             return CommandResponse(
                 text = when (type) {
+                    START_VOTE, VOTE -> """(dooray://${vote.tenantId}/members/${vote.userId} "member") 님이 투표를 생성했습니다!"""
                     END_VOTE -> """(dooray://${vote.tenantId}/members/${vote.userId} "member") 님이 투표를 종료했습니다!"""
-                    else -> """(dooray://${vote.tenantId}/members/${vote.userId} "member") 님이 투표를 생성했습니다!"""
+                    CHECK_VOTE -> "당신의 선택: $myVote"
+                    else -> "허용되지 않는 상태"
                 },
-                responseType = IN_CHANNEL.value,
+                responseType = responseType.value,
                 replaceOriginal = replaceOriginal,
                 deleteOriginal = deleteOriginal,
                 attachments = listOfNotNull(
+                    DoorayAttachment(
+                        callbackId = "${vote.voteNo}",
+                        actions = listOf(
+                            DoorayAction.createButton(
+                                name = CHECK_VOTE,
+                                text = "내 선택 확인하기",
+                            )
+                        )
+                    ).takeIf { type != END_VOTE },
                     DoorayAttachment(
                         callbackId = "${vote.voteNo}",
                         title = vote.voteTitle,
@@ -172,7 +190,8 @@ data class CommandResponse(
                             )
                         )
                     ).takeIf { type != END_VOTE },
-                )
+                ),
+                channelId = channelId,
             )
         }
 
