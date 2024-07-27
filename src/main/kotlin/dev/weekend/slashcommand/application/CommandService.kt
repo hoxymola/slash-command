@@ -1,14 +1,19 @@
 package dev.weekend.slashcommand.application
 
+import dev.weekend.slashcommand.application.model.DialogRequest
 import dev.weekend.slashcommand.domain.entity.BlindVote
 import dev.weekend.slashcommand.domain.entity.BlindVoteItem
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType.*
 import dev.weekend.slashcommand.domain.extension.toJson
+import dev.weekend.slashcommand.domain.model.DoorayDialog
+import dev.weekend.slashcommand.domain.model.DoorayElement
 import dev.weekend.slashcommand.domain.repository.BlindVoteItemRepository
 import dev.weekend.slashcommand.domain.repository.BlindVoteRepository
+import dev.weekend.slashcommand.infrastructure.client.DoorayClient
 import dev.weekend.slashcommand.presentation.model.CommandResponse
 import dev.weekend.slashcommand.presentation.model.FormCreateRequest
 import dev.weekend.slashcommand.presentation.model.VoteUpdateRequest
+import kotlinx.coroutines.runBlocking
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -21,6 +26,7 @@ import org.springframework.stereotype.Service
 class CommandService(
     private val blindVoteRepository: BlindVoteRepository,
     private val blindVoteItemRepository: BlindVoteItemRepository,
+    private val doorayClient: DoorayClient,
 ) {
     fun createBlindVote(
         createRequest: FormCreateRequest,
@@ -63,6 +69,31 @@ class CommandService(
     }
 
     private fun VoteUpdateRequest.changeTitle(): CommandResponse {
+        runBlocking {
+            doorayClient.openDialog(
+                tenantDomain = tenant.domain,
+                channelId = channel.id,
+                cmdToken = cmdToken,
+                request = DialogRequest(
+                    token = cmdToken,
+                    triggerId = triggerId,
+                    callbackId = "test-callback-id-request",
+                    dialog = DoorayDialog(
+                        callbackId = "test-callback-id-dialog",
+                        title = "test-title",
+                        submitLabel = "test-submit-label",
+                        elements = listOf(
+                            DoorayElement(
+                                label = "test-label",
+                                name = "test-name",
+                                placeholder = "test-placeholder",
+                            ),
+                        ),
+                    ),
+                ),
+            )
+        }
+
         return CommandResponse.createTempResponse(CHANGE_TITLE, this.toJson())
     }
 
@@ -93,6 +124,7 @@ class CommandService(
         return CommandResponse.createVoteBy(
             vote = vote,
             voteItems = voteItems,
+            deleteOriginal = true,
         )
     }
 
