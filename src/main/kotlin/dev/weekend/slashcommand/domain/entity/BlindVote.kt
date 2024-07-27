@@ -22,6 +22,8 @@ data class BlindVote(
     var selectableItemCnt: Int,
 
     val userId: Long,
+
+    val channelId: Long,
 ) : BaseTimeEntity() {
     fun updateTitle(
         voteTitle: String,
@@ -40,10 +42,12 @@ data class BlindVote(
             voteTitle: String,
             selectableItemCnt: Int,
             userId: String,
+            channelId: String,
         ) = BlindVote(
             voteTitle = voteTitle,
             selectableItemCnt = selectableItemCnt,
             userId = userId.toLong(),
+            channelId = channelId.toLong(),
         )
     }
 }
