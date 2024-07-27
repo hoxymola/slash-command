@@ -4,6 +4,7 @@ import dev.weekend.slashcommand.application.model.DialogRequest
 import dev.weekend.slashcommand.domain.entity.BlindVote
 import dev.weekend.slashcommand.domain.entity.BlindVoteItem
 import dev.weekend.slashcommand.domain.entity.BlindVoteMember
+import dev.weekend.slashcommand.domain.enums.DoorayResponseType.EPHEMERAL
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType.*
 import dev.weekend.slashcommand.domain.model.DoorayDialog
@@ -65,6 +66,7 @@ class CommandService(
             CHANGE_SELECTABLE_ITEM_COUNT -> request.changeSelectableItemCount() // 기존폼 + 선택가능한 개수 수정
             START_VOTE -> request.startVote()
             CANCEL_VOTE -> CommandResponse.createCancelVote()
+            CHECK_VOTE -> request.checkVote()
             VOTE -> request.vote()
             END_VOTE -> request.endVote()
         }
@@ -125,6 +127,23 @@ class CommandService(
             voteMembers = voteMembers,
             deleteOriginal = true,
             type = START_VOTE,
+            userId = user.id.toLong(),
+        )
+    }
+
+    private fun VoteUpdateRequest.checkVote(): CommandResponse {
+        val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
+        val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
+        val voteMembers = blindVoteMemberRepository.findByVoteVoteNo(vote.voteNo)
+
+        return CommandResponse.createVoteBy(
+            vote = vote,
+            voteItems = voteItems,
+            voteMembers = voteMembers,
+            responseType = EPHEMERAL,
+            replaceOriginal = true,
+            type = CHECK_VOTE,
+            userId = user.id.toLong(),
         )
     }
 
@@ -165,6 +184,7 @@ class CommandService(
                 voteMembers = voteMembers,
                 replaceOriginal = true,
                 type = VOTE,
+                userId = user.id.toLong(),
             )
         } ?: throw IllegalStateException()
     }
@@ -181,6 +201,7 @@ class CommandService(
                 voteMembers = voteMembers,
                 deleteOriginal = true,
                 type = END_VOTE,
+                userId = user.id.toLong(),
             )
         } else {
             CommandResponse.createResponse(
