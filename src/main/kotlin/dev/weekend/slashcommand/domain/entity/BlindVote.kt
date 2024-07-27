@@ -16,7 +16,7 @@ data class BlindVote(
 
     @ManyToOne(targetEntity = BlindVoteEmoji::class)
     @JoinColumn(name = "vote_emoji_no")
-    val emoji: BlindVoteEmoji,
+    val voteEmoji: BlindVoteEmoji,
 
     var voteTitle: String,
 
@@ -56,7 +56,7 @@ data class BlindVote(
             responseUrl: String,
         ) = BlindVote(
             voteTitle = voteTitle,
-            emoji = emoji,
+            voteEmoji = emoji,
             selectableItemCnt = selectableItemCnt,
             userId = userId.toLong(),
             tenantId = tenantId.toLong(),
