@@ -38,21 +38,12 @@ class CommandService(
         createRequest: FormCreateRequest,
     ): CommandResponse {
         val vote = BlindVote.createBy(
-            voteTitle = "무기명 투표!",
-            selectableItemCnt = 3,
             userId = createRequest.userId,
             tenantId = createRequest.tenantId,
         ).let { blindVoteRepository.save(it) }
 
-        val voteItems = listOf(
-            BlindVoteItem.createBy(vote, "짜장면"),
-            BlindVoteItem.createBy(vote, "짬뽕"),
-            BlindVoteItem.createBy(vote, "탕수육"),
-        ).let { blindVoteItemRepository.saveAll(it) }
-
         return CommandResponse.createFormBy(
             vote = vote,
-            voteItems = voteItems,
         )
     }
 
