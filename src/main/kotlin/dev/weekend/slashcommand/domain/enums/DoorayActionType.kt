@@ -4,10 +4,10 @@ package dev.weekend.slashcommand.domain.enums
  * @author Jaeguk Cho
  */
 
-enum class ResponseType(
+enum class DoorayActionType(
     val value: String,
 ) {
-    IN_CHANNEL("inChannel"),
-    EPHEMERAL("ephemeral"),
+    BUTTON("button"),
+    SELECT("select"),
     ;
 }
