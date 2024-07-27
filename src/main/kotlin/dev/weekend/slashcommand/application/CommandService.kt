@@ -157,6 +157,7 @@ class CommandService(
     private fun VoteUpdateRequest.openItemChangeDialog(): CommandResponse {
         transactionTemplate.executeWithoutResult {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
+            val voteItem = blindVoteItemRepository.findByIdOrNull(voteItemNo) ?: throw NotFoundException()
 
             vote.updateResponseUrl(responseUrl)
 
@@ -164,6 +165,7 @@ class CommandService(
                 title = "항목 수정",
                 submitLabel = "저장",
                 type = CHANGE_ITEM,
+                value = voteItem.voteItemName,
             )
         }
 
@@ -320,6 +322,7 @@ class CommandService(
         title: String,
         submitLabel: String,
         type: VoteInteractionType,
+        value: String? = null,
     ) {
         runBlocking {
             doorayClient.openDialog(
@@ -337,6 +340,7 @@ class CommandService(
                         elements = listOf(
                             DoorayElement(
                                 name = type.name,
+                                value = value,
                             ),
                         ),
                     ),

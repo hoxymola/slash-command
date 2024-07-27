@@ -8,6 +8,7 @@ data class DoorayElement(
     val type: String = "text",
     val label: String = "",
     val name: String,
+    val value: String?,
     val minLength: Int = 1,
     val maxLength: Int = 100,
 )
