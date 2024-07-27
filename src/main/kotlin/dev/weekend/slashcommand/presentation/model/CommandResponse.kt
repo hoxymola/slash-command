@@ -2,6 +2,7 @@ package dev.weekend.slashcommand.presentation.model
 
 import dev.weekend.slashcommand.domain.entity.BlindVote
 import dev.weekend.slashcommand.domain.entity.BlindVoteItem
+import dev.weekend.slashcommand.domain.entity.BlindVoteMember
 import dev.weekend.slashcommand.domain.enums.DoorayActionType.SELECT
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.PRIMARY
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.EPHEMERAL
@@ -23,8 +24,23 @@ data class CommandResponse(
     val replaceOriginal: Boolean? = null,
     val deleteOriginal: Boolean? = null,
     val attachments: List<DoorayAttachment>? = null,
+    val channelId: String? = null,
 ) {
     companion object {
+        private val emojiList = listOf(
+            "🌝",
+            "👻",
+            "👍",
+            "🐶",
+            "🔥",
+            "🍎",
+            "⚽️",
+            "❤️",
+            "🌸",
+            "👽",
+            "👾",
+        )
+
         fun createCancelVote() = CommandResponse(
             text = "투표 생성을 취소했습니다. 🥺",
             responseType = EPHEMERAL.value,
@@ -106,55 +122,59 @@ data class CommandResponse(
         fun createVoteBy(
             vote: BlindVote,
             voteItems: List<BlindVoteItem>,
+            voteMembers: List<BlindVoteMember>,
             replaceOriginal: Boolean? = null,
             deleteOriginal: Boolean? = null,
-            closed: Boolean,
-        ) = CommandResponse(
-            text = if (closed) {
-                """(dooray://${vote.userId}/members/${vote.userId} "member")님이 투표를 종료했습니다!"""
-            } else {
-                """(dooray://${vote.userId}/members/${vote.userId} "member")님이 투표를 생성했습니다!"""
-            },
-            responseType = IN_CHANNEL.value,
-            replaceOriginal = replaceOriginal,
-            deleteOriginal = deleteOriginal,
-            attachments = listOfNotNull(
-                DoorayAttachment(
-                    callbackId = "${vote.voteNo}",
-                    title = vote.voteTitle,
-                    text = "최대 ${vote.selectableItemCnt}개까지 고를 수 있습니다.",
-                    actions = voteItems.map {
-                        DoorayAction.createButton(
-                            name = VOTE,
-                            text = it.voteItemName,
-                            value = "${it.voteItemNo}",
+            type: VoteInteractionType,
+        ): CommandResponse {
+            val emoji = emojiList[vote.voteNo.toInt() % emojiList.size]
+
+            return CommandResponse(
+                text = when (type) {
+                    END_VOTE -> """(dooray://${vote.tenantId}/members/${vote.userId} "member") 님이 투표를 종료했습니다!"""
+                    else -> """(dooray://${vote.tenantId}/members/${vote.userId} "member") 님이 투표를 생성했습니다!"""
+                },
+                responseType = IN_CHANNEL.value,
+                replaceOriginal = replaceOriginal,
+                deleteOriginal = deleteOriginal,
+                attachments = listOfNotNull(
+                    DoorayAttachment(
+                        callbackId = "${vote.voteNo}",
+                        title = vote.voteTitle,
+                        text = "최대 ${vote.selectableItemCnt}개까지 고를 수 있습니다.",
+                        actions = voteItems.map {
+                            DoorayAction.createButton(
+                                name = VOTE,
+                                text = it.voteItemName,
+                                value = "${it.voteItemNo}",
+                            )
+                        },
+                    ).takeIf { type != END_VOTE },
+                    DoorayAttachment(
+                        callbackId = "${vote.voteNo}",
+                        fields = voteItems.map {
+                            DoorayField(
+                                title = it.voteItemName,
+                                value = emoji.repeat(it.voteCnt).takeIf { it.isNotEmpty() } ?: " ",
+                            )
+                        },
+                    ),
+                    DoorayAttachment(
+                        callbackId = "${vote.voteNo}",
+                        title = "총 투표자 수: " + voteMembers.distinctBy { it.userId }.size,
+                    ),
+                    DoorayAttachment(
+                        callbackId = "${vote.voteNo}",
+                        actions = listOf(
+                            DoorayAction.createButton(
+                                name = END_VOTE,
+                                text = "투표 종료!",
+                            )
                         )
-                    },
-                ).takeIf { !closed },
-                DoorayAttachment(
-                    callbackId = "${vote.voteNo}",
-                    fields = voteItems.map {
-                        DoorayField(
-                            title = it.voteItemName,
-                            value = "🌝".repeat(it.voteCnt),
-                        )
-                    },
-                ),
-                DoorayAttachment(
-                    callbackId = "${vote.voteNo}",
-                    title = "총 투표자 수: ?",
-                ),
-                DoorayAttachment(
-                    callbackId = "${vote.voteNo}",
-                    actions = listOf(
-                        DoorayAction.createButton(
-                            name = END_VOTE,
-                            text = "투표 종료!",
-                        )
-                    )
-                ).takeIf { !closed },
+                    ).takeIf { type != END_VOTE },
+                )
             )
-        )
+        }
 
         fun createTempResponse(
             actionName: VoteInteractionType,
@@ -175,9 +195,17 @@ data class CommandResponse(
             ),
         )
 
-        fun createEmptyResponse() = CommandResponse(
-            text = "",
+        fun createResponse(
+            text: String = "",
+            replaceOriginal: Boolean? = null,
+            deleteOriginal: Boolean? = null,
+            channelId: String? = null,
+        ) = CommandResponse(
+            text = text,
             responseType = EPHEMERAL.value,
+            replaceOriginal = replaceOriginal,
+            deleteOriginal = deleteOriginal,
+            channelId = channelId,
         )
     }
 }

@@ -18,18 +18,20 @@ data class BlindVoteMember(
     @JoinColumn(name = "vote_no")
     val vote: BlindVote,
 
-    val voteItemNo: Long,
+    @OneToOne(targetEntity = BlindVoteItem::class)
+    @JoinColumn(name = "vote_item_no")
+    val voteItem: BlindVoteItem,
 
     val userId: Long,
 ) : BaseTimeEntity() {
     companion object {
         fun createBy(
             vote: BlindVote,
-            voteItemNo: Long,
+            voteItem: BlindVoteItem,
             userId: Long,
         ) = BlindVoteMember(
             vote = vote,
-            voteItemNo = voteItemNo,
+            voteItem = voteItem,
             userId = userId,
         )
     }

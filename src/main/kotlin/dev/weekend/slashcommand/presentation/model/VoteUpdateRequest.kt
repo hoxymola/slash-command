@@ -25,6 +25,7 @@ data class VoteUpdateRequest(
     val commandRequestUrl: String,
     val channelLogId: String,
     val originalMessage: CommandResponse,
+    val responseUrl: String,
 ) {
     val voteNo = callbackId.toLong()
 }
