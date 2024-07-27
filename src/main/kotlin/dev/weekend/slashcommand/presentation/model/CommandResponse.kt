@@ -175,10 +175,15 @@ data class CommandResponse(
                     ).takeIf { type != END_VOTE },
                     DoorayAttachment(
                         callbackId = "${vote.voteNo}",
-                        fields = voteItems.map {
+                        fields = voteItems.let { items ->
+                            when (type) {
+                                END_VOTE -> items.sortedBy { it.voteItemNo }
+                                else -> items.sortedByDescending { it.voteCnt }
+                            }
+                        }.map { item ->
                             DoorayField(
-                                title = voteItem.voteItemName + "🥇".takeIf { voteItem.voteCnt == maxVoteCount },
-                                value = emoji.repeat(voteItem.voteCnt).takeIf { it.isNotEmpty() } ?: " ",
+                                title = item.voteItemName + "🥇".takeIf { item.voteCnt == maxVoteCount },
+                                value = emoji.repeat(item.voteCnt).takeIf { it.isNotEmpty() } ?: " ",
                             )
                         },
                     ),
