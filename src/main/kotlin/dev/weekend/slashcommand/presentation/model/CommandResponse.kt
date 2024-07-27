@@ -108,9 +108,12 @@ data class CommandResponse(
             voteItems: List<BlindVoteItem>,
             replaceOriginal: Boolean? = null,
             deleteOriginal: Boolean? = null,
+            closed: Boolean,
         ) = CommandResponse(
-            text = vote.userId.let {
-                """(dooray://1387695619080878080/members/$it "member")님이 투표를 생성했습니다!"""
+            text = if (closed) {
+                """(dooray://${vote.userId}/members/${vote.userId} "member")님이 투표를 종료했습니다!"""
+            } else {
+                """(dooray://${vote.userId}/members/${vote.userId} "member")님이 투표를 생성했습니다!"""
             },
             responseType = IN_CHANNEL.value,
             replaceOriginal = replaceOriginal,
@@ -127,7 +130,7 @@ data class CommandResponse(
                             value = "${it.voteItemNo}",
                         )
                     },
-                ),
+                ).takeIf { !closed },
                 DoorayAttachment(
                     callbackId = "${vote.voteNo}",
                     fields = voteItems.map {
@@ -149,7 +152,7 @@ data class CommandResponse(
                             text = "투표 종료!",
                         )
                     )
-                ),
+                ).takeIf { !closed },
             )
         )
 
@@ -170,6 +173,11 @@ data class CommandResponse(
                     ),
                 ),
             ),
+        )
+
+        fun createEmptyResponse() = CommandResponse(
+            text = "",
+            responseType = EPHEMERAL.value,
         )
     }
 }

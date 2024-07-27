@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
  */
 
 @Component
-class WebClientConfiguration(
+class WebClientConfig(
 ) {
     @Bean
     fun getWebClient(): WebClient {

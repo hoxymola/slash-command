@@ -22,4 +22,15 @@ data class BlindVoteMember(
 
     val userId: Long,
 ) : BaseTimeEntity() {
+    companion object {
+        fun createBy(
+            vote: BlindVote,
+            voteItemNo: Long,
+            userId: Long,
+        ) = BlindVoteMember(
+            vote = vote,
+            voteItemNo = voteItemNo,
+            userId = userId,
+        )
+    }
 }
