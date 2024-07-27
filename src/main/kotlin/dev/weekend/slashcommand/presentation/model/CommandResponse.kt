@@ -136,6 +136,7 @@ data class CommandResponse(
                 .sortedBy { it.voteItem.voteItemNo }
                 .joinToString(" / ") { it.voteItem.voteItemName }
                 .takeIf { it.isNotEmpty() } ?: "X"
+            val maxVoteCount = voteItems.maxOf { it.voteCnt }
 
             return CommandResponse(
                 text = when (type) {
@@ -176,8 +177,8 @@ data class CommandResponse(
                         callbackId = "${vote.voteNo}",
                         fields = voteItems.map {
                             DoorayField(
-                                title = it.voteItemName,
-                                value = emoji.repeat(it.voteCnt).takeIf { it.isNotEmpty() } ?: " ",
+                                title = voteItem.voteItemName + "🥇".takeIf { voteItem.voteCnt == maxVoteCount },
+                                value = emoji.repeat(voteItem.voteCnt).takeIf { it.isNotEmpty() } ?: " ",
                             )
                         },
                     ),
