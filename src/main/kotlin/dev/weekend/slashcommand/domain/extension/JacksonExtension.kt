@@ -9,6 +9,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
 import com.fasterxml.jackson.module.kotlin.KotlinFeature
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.jacksonTypeRef
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -40,3 +41,11 @@ object Jackson {
 }
 
 fun Any.toJson(): String = Jackson.mapper().writeValueAsString(this)
+
+inline fun <reified T> String?.toModelOrNull(): T? {
+    return try {
+        this?.let { Jackson.mapper().readValue(this, jacksonTypeRef<T>()) }
+    } catch (e: Exception) {
+        null
+    }
+}
