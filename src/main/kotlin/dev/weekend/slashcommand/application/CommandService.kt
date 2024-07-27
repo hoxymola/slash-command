@@ -7,9 +7,9 @@ import dev.weekend.slashcommand.domain.entity.BlindVoteMember
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.EPHEMERAL
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType.*
-import dev.weekend.slashcommand.domain.extension.toJson
 import dev.weekend.slashcommand.domain.model.DoorayDialog
 import dev.weekend.slashcommand.domain.model.DoorayElement
+import dev.weekend.slashcommand.domain.repository.BlindVoteEmojiRepository
 import dev.weekend.slashcommand.domain.repository.BlindVoteItemRepository
 import dev.weekend.slashcommand.domain.repository.BlindVoteMemberRepository
 import dev.weekend.slashcommand.domain.repository.BlindVoteRepository
@@ -32,13 +32,16 @@ class CommandService(
     private val blindVoteRepository: BlindVoteRepository,
     private val blindVoteItemRepository: BlindVoteItemRepository,
     private val blindVoteMemberRepository: BlindVoteMemberRepository,
+    private val blindVoteEmojiRepository: BlindVoteEmojiRepository,
     private val doorayClient: DoorayClient,
     private val transactionTemplate: TransactionTemplate,
 ) {
     fun createBlindVote(
         createRequest: FormCreateRequest,
     ): CommandResponse {
+        val emoji = blindVoteEmojiRepository.getRandomEmoji()
         val vote = BlindVote.createBy(
+            emoji = emoji,
             userId = createRequest.userId,
             tenantId = createRequest.tenantId,
             responseUrl = createRequest.responseUrl,
