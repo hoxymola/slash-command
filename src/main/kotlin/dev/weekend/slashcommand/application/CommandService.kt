@@ -7,6 +7,7 @@ import dev.weekend.slashcommand.domain.entity.BlindVoteMember
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.EPHEMERAL
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType.*
+import dev.weekend.slashcommand.domain.extension.toJson
 import dev.weekend.slashcommand.domain.model.DoorayDialog
 import dev.weekend.slashcommand.domain.model.DoorayElement
 import dev.weekend.slashcommand.domain.repository.BlindVoteItemRepository
@@ -40,6 +41,7 @@ class CommandService(
         val vote = BlindVote.createBy(
             userId = createRequest.userId,
             tenantId = createRequest.tenantId,
+            responseUrl = createRequest.responseUrl,
         ).let { blindVoteRepository.save(it) }
 
         return CommandResponse.createFormBy(
@@ -67,42 +69,58 @@ class CommandService(
     }
 
     private fun VoteUpdateRequest.openTitleChangeDialog(): CommandResponse {
-        openDialog(
-            title = "제목 수정",
-            submitLabel = "저장",
-            type = CHANGE_TITLE,
-        )
+        transactionTemplate.executeWithoutResult {
+            val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
 
-        return CommandResponse.createResponse(
-            text = "제목 수정 버튼을 눌렀을 때~",
-            replaceOriginal = true,
-        )
+            vote.updateResponseUrl(responseUrl)
+
+            openDialog(
+                title = "제목 수정",
+                submitLabel = "저장",
+                type = CHANGE_TITLE,
+            )
+        }
+
+        return CommandResponse.createResponse()
     }
 
     private fun VoteUpdateRequest.changeTitle(): CommandResponse {
         transactionTemplate.executeWithoutResult {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
+            val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
 
             vote.updateTitle(submission.getValue(CHANGE_TITLE))
+
+            runBlocking {
+                doorayClient.sendHook(
+                    uri = vote.responseUrl,
+                    body = CommandResponse.createFormBy(
+                        vote = vote,
+                        voteItems = voteItems,
+                        replaceOriginal = true,
+                        channelId = channel.id,
+                    ),
+                )
+            }
         }
 
-        return CommandResponse.createResponse(
-            text = "수정할 제목을 입력했을때",
-            replaceOriginal = true,
-        )
+        return CommandResponse.createResponse()
     }
 
     private fun VoteUpdateRequest.openItemAddDialog(): CommandResponse {
-        openDialog(
-            title = "항목 추가",
-            submitLabel = "저장",
-            type = ADD_ITEM,
-        )
+        transactionTemplate.executeWithoutResult {
+            val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
 
-        return CommandResponse.createResponse(
-            text = "항목 추가 버튼을 눌렀을 대",
-            replaceOriginal = true,
-        )
+            vote.updateResponseUrl(responseUrl)
+
+            openDialog(
+                title = "항목 추가",
+                submitLabel = "저장",
+                type = ADD_ITEM,
+            )
+        }
+
+        return CommandResponse.createResponse()
     }
 
     private fun VoteUpdateRequest.addItem(): CommandResponse {
@@ -116,25 +134,37 @@ class CommandService(
             ).let { blindVoteItemRepository.save(it) }
                 .also { voteItems.add(it) }
             vote.updateSelectableItemCnt(voteItems.size)
+
+            runBlocking {
+                doorayClient.sendHook(
+                    uri = vote.responseUrl,
+                    body = CommandResponse.createFormBy(
+                        vote = vote,
+                        voteItems = voteItems,
+                        replaceOriginal = true,
+                        channelId = channel.id,
+                    ),
+                )
+            }
         }
 
-        return CommandResponse.createResponse(
-            text = "추가할 항목을 입력했을 때",
-            replaceOriginal = true,
-        )
+        return CommandResponse.createResponse()
     }
 
     private fun VoteUpdateRequest.openItemChangeDialog(): CommandResponse {
-        openDialog(
-            title = "항목 수정",
-            submitLabel = "저장",
-            type = CHANGE_ITEM,
-        )
+        transactionTemplate.executeWithoutResult {
+            val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
 
-        return CommandResponse.createResponse(
-            text = "항목 변경 버튼을 눌렀을때",
-            replaceOriginal = true,
-        )
+            vote.updateResponseUrl(responseUrl)
+
+            openDialog(
+                title = "항목 수정",
+                submitLabel = "저장",
+                type = CHANGE_ITEM,
+            )
+        }
+
+        return CommandResponse.createResponse()
     }
 
     private fun VoteUpdateRequest.changeItem(): CommandResponse {
@@ -144,12 +174,21 @@ class CommandService(
 
             voteItems.first { it.voteItemNo == voteItemNo }
                 .updateName(submission.getValue(CHANGE_ITEM))
+
+            runBlocking {
+                doorayClient.sendHook(
+                    uri = vote.responseUrl,
+                    body = CommandResponse.createFormBy(
+                        vote = vote,
+                        voteItems = voteItems,
+                        replaceOriginal = true,
+                        channelId = channel.id,
+                    ),
+                )
+            }
         }
 
-        return CommandResponse.createResponse(
-            text = "변경할 항목을 입력했을 때",
-            replaceOriginal = true,
-        )
+        return CommandResponse.createResponse()
     }
 
     private fun VoteUpdateRequest.changeSelectableItemCount(): CommandResponse {

@@ -1,12 +1,8 @@
 package dev.weekend.slashcommand.presentation
 
 import dev.weekend.slashcommand.application.CommandService
-import dev.weekend.slashcommand.domain.enums.DoorayResponseType
-import dev.weekend.slashcommand.domain.extension.toJson
-import dev.weekend.slashcommand.domain.extension.toModelOrNull
 import dev.weekend.slashcommand.domain.model.DoorayChannel
 import dev.weekend.slashcommand.infrastructure.client.DoorayClient
-import dev.weekend.slashcommand.presentation.model.CommandResponse
 import dev.weekend.slashcommand.presentation.model.FormCreateRequest
 import dev.weekend.slashcommand.presentation.model.VoteUpdateRequest
 import kotlinx.coroutines.Dispatchers
@@ -38,20 +34,7 @@ class CommandHandler(
 
     suspend fun updateBlindVote(request: ServerRequest): ServerResponse {
         return withContext(Dispatchers.Default) {
-            val temp = request.awaitBody<Any>()
-            val createRequest = temp.toJson().toModelOrNull<VoteUpdateRequest>()!!
-            val t2 = temp.toJson().toModelOrNull<Temp>()!!
-            //            val createRequest = request.awaitBody<VoteUpdateRequest>()
-
-//            doorayClient.sendHook(
-//                uri = t2.responseUrl,
-//                body = CommandResponse(
-//                    text = temp.toJson(),
-//                    responseType = DoorayResponseType.IN_CHANNEL.value,
-//                    replaceOriginal = false,
-//                    channelId = t2.channel.id,
-//                )
-//            )
+            val createRequest = request.awaitBody<VoteUpdateRequest>()
 
             commandService.updateBlindVote(createRequest)
                 .let { ok().bodyValueAndAwait(it) }
