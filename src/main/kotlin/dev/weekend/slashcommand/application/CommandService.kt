@@ -157,7 +157,7 @@ class CommandService(
     private fun VoteUpdateRequest.openItemChangeDialog(): CommandResponse {
         transactionTemplate.executeWithoutResult {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
-            val voteItem = blindVoteItemRepository.findByIdOrNull(voteItemNo) ?: throw NotFoundException()
+            val voteItem = blindVoteItemRepository.findByIdOrNull(actionValue?.toLong()) ?: throw NotFoundException()
 
             vote.updateResponseUrl(responseUrl)
 
