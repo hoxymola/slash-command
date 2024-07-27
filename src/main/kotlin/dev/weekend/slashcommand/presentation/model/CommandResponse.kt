@@ -121,6 +121,8 @@ data class CommandResponse(
                 .sortedBy { it.voteItem.voteItemNo }
                 .joinToString(" / ") { it.voteItem.voteItemName }
                 .takeIf { it.isNotEmpty() } ?: "X"
+            val maxVoteCount = voteItems.maxOf { it.voteCnt }
+            val isGoldMedal = { count: Int -> count > 0 && count == maxVoteCount }
 
             return CommandResponse(
                 text = when (type) {
@@ -143,6 +145,9 @@ data class CommandResponse(
                         )
                     ).takeIf { type != END_VOTE },
                     DoorayAttachment(
+                        title = vote.voteTitle,
+                    ).takeIf { type == END_VOTE },
+                    DoorayAttachment(
                         callbackId = "${vote.voteNo}",
                         title = vote.voteTitle,
                         text = "최대 ${vote.selectableItemCnt}개까지 고를 수 있습니다.",
@@ -156,10 +161,15 @@ data class CommandResponse(
                     ).takeIf { type != END_VOTE },
                     DoorayAttachment(
                         callbackId = "${vote.voteNo}",
-                        fields = voteItems.map {
+                        fields = voteItems.let { items ->
+                            when (type) {
+                                END_VOTE -> items.sortedByDescending { it.voteCnt }
+                                else -> items.sortedBy { it.voteItemNo }
+                            }
+                        }.map { item ->
                             DoorayField(
-                                title = it.voteItemName,
-                                value = vote.voteEmoji.emoji.repeat(it.voteCnt).takeIf { it.isNotEmpty() } ?: " ",
+                                title = item.voteItemName + " 🥇".takeIf { isGoldMedal(item.voteCnt) }.orEmpty(),
+                                value = vote.voteEmoji.emoji.repeat(item.voteCnt).takeIf { it.isNotEmpty() } ?: " ",
                             )
                         },
                     ),
