@@ -3,8 +3,8 @@ README.md
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
-!**/src/main/resources/application.yaml
 !**/src/test/**/build/
+application.yaml
 
 ### STS ###
 .apt_generated
