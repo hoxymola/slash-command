@@ -137,6 +137,7 @@ data class CommandResponse(
                 .joinToString(" / ") { it.voteItem.voteItemName }
                 .takeIf { it.isNotEmpty() } ?: "X"
             val maxVoteCount = voteItems.maxOf { it.voteCnt }
+            val isGoldMedal = { count: Int -> count > 0 && count == maxVoteCount }
 
             return CommandResponse(
                 text = when (type) {
@@ -182,7 +183,7 @@ data class CommandResponse(
                             }
                         }.map { item ->
                             DoorayField(
-                                title = item.voteItemName + "🥇".takeIf { item.voteCnt == maxVoteCount },
+                                title = item.voteItemName + " 🥇".takeIf { isGoldMedal(item.voteCnt) }.orEmpty(),
                                 value = emoji.repeat(item.voteCnt).takeIf { it.isNotEmpty() } ?: " ",
                             )
                         },
