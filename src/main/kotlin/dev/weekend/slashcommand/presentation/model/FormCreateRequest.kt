@@ -6,14 +6,6 @@ package dev.weekend.slashcommand.presentation.model
 
 data class FormCreateRequest(
     val tenantId: String,
-    val tenantDomain: String,
-    val channelId: String,
-    val channelName: String,
     val userId: String,
-    val command: String,
-    val text: String,
-    val responseUrl: String,
-    val appToken: String,
     val cmdToken: String,
-    val triggerId: String,
 )

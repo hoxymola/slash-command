@@ -39,8 +39,8 @@ data class BlindVote(
 
     companion object {
         fun createBy(
-            voteTitle: String,
-            selectableItemCnt: Int,
+            voteTitle: String = "",
+            selectableItemCnt: Int = 0,
             userId: String,
             tenantId: String,
         ) = BlindVote(

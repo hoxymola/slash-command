@@ -11,21 +11,17 @@ import dev.weekend.slashcommand.domain.model.DoorayUser
 
 data class VoteUpdateRequest(
     val user: DoorayUser,
-    val actionName: VoteInteractionType,
-    val actionValue: String,
+    val actionName: VoteInteractionType?, // 대화상자 응답 시에는 null
+    val actionValue: String?,
     val callbackId: String,
     val tenant: DoorayTenant,
     val channel: DoorayChannel,
-    val commandName: String,
-    val command: String,
-    val text: String,
-    val appToken: String,
     val cmdToken: String,
     val triggerId: String,
-    val commandRequestUrl: String,
-    val channelLogId: String,
-    val originalMessage: CommandResponse,
     val responseUrl: String,
+    val originalMessage: CommandResponse?,
+    val submission: Map<VoteInteractionType, String> = emptyMap(), // 대화상자 응답 시에만 오는 값
 ) {
-    val voteNo = callbackId.toLong()
+    val voteNo = callbackId.substringBefore(':').toLong()
+    val voteItemNo = callbackId.substringAfter(':').toLongOrNull()
 }

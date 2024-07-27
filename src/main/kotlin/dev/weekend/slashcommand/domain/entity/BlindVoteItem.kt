@@ -38,11 +38,11 @@ data class BlindVoteItem(
 
     companion object {
         fun createBy(
-            voteItemName: String,
             vote: BlindVote,
+            voteItemName: String,
         ) = BlindVoteItem(
-            voteItemName = voteItemName,
             vote = vote,
+            voteItemName = voteItemName,
         )
     }
 }

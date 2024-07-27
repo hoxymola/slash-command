@@ -50,9 +50,10 @@ data class CommandResponse(
 
         fun createFormBy(
             vote: BlindVote,
-            voteItems: List<BlindVoteItem>,
+            voteItems: List<BlindVoteItem> = emptyList(),
             replaceOriginal: Boolean? = null,
             deleteOriginal: Boolean? = null,
+            channelId: String? = null,
         ) = CommandResponse(
             text = "무기명 투표 생성 중",
             responseType = EPHEMERAL.value,
@@ -65,9 +66,8 @@ data class CommandResponse(
                     text = vote.voteTitle,
                     actions = listOf(
                         DoorayAction.createButton(
-                            name = CHANGE_TITLE,
+                            name = OPEN_TITLE_CHANGE_DIALOG,
                             text = "수정",
-                            value = "변경된 타이틀~", // 어떻게 입력받지
                         ),
                     ),
                 ),
@@ -76,14 +76,13 @@ data class CommandResponse(
                     title = "항목",
                     actions = voteItems.map {
                         DoorayAction.createButton(
-                            name = CHANGE_ITEM,
+                            name = OPEN_ITEM_CHANGE_DIALOG,
                             text = it.voteItemName,
-                            value = "수정된 항목" + it.voteItemNo, // 입력받기 (1개씩)
+                            value = "${it.voteItemNo}",
                         )
                     } + DoorayAction.createButton(
-                        name = ADD_ITEM,
+                        name = OPEN_ITEM_ADD_DIALOG,
                         text = "+",
-                        value = "새로운 값을 추가해주세요이",
                     ),
                 ),
                 DoorayAttachment(
@@ -118,12 +117,13 @@ data class CommandResponse(
                     ),
                 ),
             ),
+            channelId = channelId,
         )
 
         fun createVoteBy(
             vote: BlindVote,
             voteItems: List<BlindVoteItem>,
-            voteMembers: List<BlindVoteMember>,
+            voteMembers: List<BlindVoteMember> = emptyList(),
             responseType: DoorayResponseType = IN_CHANNEL,
             replaceOriginal: Boolean? = null,
             deleteOriginal: Boolean? = null,
@@ -135,6 +135,7 @@ data class CommandResponse(
             val myVote = voteMembers.filter { it.userId == userId }
                 .sortedBy { it.voteItem.voteItemNo }
                 .joinToString(" / ") { it.voteItem.voteItemName }
+                .takeIf { it.isNotEmpty() } ?: "X"
 
             return CommandResponse(
                 text = when (type) {
@@ -194,25 +195,6 @@ data class CommandResponse(
                 channelId = channelId,
             )
         }
-
-        fun createTempResponse(
-            actionName: VoteInteractionType,
-            request: String,
-        ) = CommandResponse(
-            text = actionName.name,
-            responseType = EPHEMERAL.value,
-            attachments = listOf(
-                DoorayAttachment(
-                    callbackId = "temp",
-                    fields = listOf(
-                        DoorayField(
-                            title = "제목",
-                            value = request,
-                        ),
-                    ),
-                ),
-            ),
-        )
 
         fun createResponse(
             text: String = "",
