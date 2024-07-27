@@ -28,20 +28,6 @@ data class CommandResponse(
     val channelId: String? = null,
 ) {
     companion object {
-        private val emojiList = listOf(
-            "🌝",
-            "👻",
-            "👍",
-            "🐶",
-            "🔥",
-            "🍎",
-            "⚽️",
-            "❤️",
-            "🌸",
-            "👽",
-            "👾",
-        )
-
         fun createCancelVote() = CommandResponse(
             text = "투표 생성을 취소했습니다. 🥺",
             responseType = EPHEMERAL.value,
@@ -55,7 +41,7 @@ data class CommandResponse(
             deleteOriginal: Boolean? = null,
             channelId: String? = null,
         ) = CommandResponse(
-            text = "무기명 투표 생성 중",
+            text = "투표 생성 중",
             responseType = EPHEMERAL.value,
             replaceOriginal = replaceOriginal,
             deleteOriginal = deleteOriginal,
@@ -131,7 +117,6 @@ data class CommandResponse(
             userId: Long,
             channelId: String? = null, // 훅으로 보낼 땐 필수
         ): CommandResponse {
-            val emoji = emojiList[vote.voteNo.toInt() % emojiList.size]
             val myVote = voteMembers.filter { it.userId == userId }
                 .sortedBy { it.voteItem.voteItemNo }
                 .joinToString(" / ") { it.voteItem.voteItemName }
@@ -174,7 +159,7 @@ data class CommandResponse(
                         fields = voteItems.map {
                             DoorayField(
                                 title = it.voteItemName,
-                                value = emoji.repeat(it.voteCnt).takeIf { it.isNotEmpty() } ?: " ",
+                                value = vote.voteEmoji.emoji.repeat(it.voteCnt).takeIf { it.isNotEmpty() } ?: " ",
                             )
                         },
                     ),

@@ -1,10 +1,7 @@
 package dev.weekend.slashcommand.domain.entity
 
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
+import jakarta.persistence.*
 import jakarta.persistence.GenerationType.IDENTITY
-import jakarta.persistence.Id
-import jakarta.persistence.Table
 
 /**
  * @author Jaeguk Cho
@@ -16,6 +13,10 @@ data class BlindVote(
     @Id
     @GeneratedValue(strategy = IDENTITY)
     val voteNo: Long = 0,
+
+    @ManyToOne(targetEntity = BlindVoteEmoji::class)
+    @JoinColumn(name = "vote_emoji_no")
+    val voteEmoji: BlindVoteEmoji,
 
     var voteTitle: String,
 
@@ -48,12 +49,14 @@ data class BlindVote(
     companion object {
         fun createBy(
             voteTitle: String = "",
+            emoji: BlindVoteEmoji,
             selectableItemCnt: Int = 0,
             userId: String,
             tenantId: String,
             responseUrl: String,
         ) = BlindVote(
             voteTitle = voteTitle,
+            voteEmoji = emoji,
             selectableItemCnt = selectableItemCnt,
             userId = userId.toLong(),
             tenantId = tenantId.toLong(),
