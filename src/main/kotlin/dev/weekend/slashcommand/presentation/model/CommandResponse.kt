@@ -55,7 +55,7 @@ data class CommandResponse(
             deleteOriginal: Boolean? = null,
             channelId: String? = null,
         ) = CommandResponse(
-            text = "무기명 투표 생성 중",
+            text = "투표 생성 중",
             responseType = EPHEMERAL.value,
             replaceOriginal = replaceOriginal,
             deleteOriginal = deleteOriginal,
