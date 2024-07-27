@@ -19,7 +19,6 @@ data class VoteUpdateRequest(
     val cmdToken: String,
     val triggerId: String,
     val responseUrl: String,
-    val originalMessage: CommandResponse?,
     val submission: Map<VoteInteractionType, String> = emptyMap(), // 대화상자 응답 시에만 오는 값
 ) {
     val voteNo = callbackId.substringBefore(':').toLong()

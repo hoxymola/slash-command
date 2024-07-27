@@ -24,6 +24,8 @@ data class BlindVote(
     val userId: Long,
 
     val tenantId: Long,
+
+    var responseUrl: String,
 ) : BaseTimeEntity() {
     fun updateTitle(
         voteTitle: String,
@@ -37,17 +39,25 @@ data class BlindVote(
         this.selectableItemCnt = selectableItemCnt
     }
 
+    fun updateResponseUrl(
+        responseUrl: String,
+    ) {
+        this.responseUrl = responseUrl
+    }
+
     companion object {
         fun createBy(
             voteTitle: String = "",
             selectableItemCnt: Int = 0,
             userId: String,
             tenantId: String,
+            responseUrl: String,
         ) = BlindVote(
             voteTitle = voteTitle,
             selectableItemCnt = selectableItemCnt,
             userId = userId.toLong(),
             tenantId = tenantId.toLong(),
+            responseUrl = responseUrl,
         )
     }
 }
