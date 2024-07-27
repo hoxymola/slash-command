@@ -16,9 +16,7 @@ class CommandRouter(
     @Bean
     fun coCommandRouter() = coRouter {
         (accept(APPLICATION_JSON) and "/slash-command").nest {
-            headers { "1.0" in it.header("Version") }.nest {
-                POST("/blind-vote", commandHandler::hi)
-            }
+            POST("/blind-vote", commandHandler::createBlindVote)
         }
     }
 }

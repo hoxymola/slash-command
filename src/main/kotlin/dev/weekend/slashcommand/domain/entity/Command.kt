@@ -13,7 +13,6 @@ import org.hibernate.annotations.DynamicUpdate
 
 @Entity
 @Table(name = "command")
-@DynamicUpdate
 data class Command(
     @Id
     @GeneratedValue(strategy = IDENTITY)
