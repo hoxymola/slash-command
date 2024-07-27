@@ -4,7 +4,7 @@ package dev.weekend.slashcommand.presentation.model
  * @author Jaeguk Cho
  */
 
-data class BlindVoteCreateRequest(
+data class FormCreateRequest(
     val tenantId: String,
     val tenantDomain: String,
     val channelId: String,
