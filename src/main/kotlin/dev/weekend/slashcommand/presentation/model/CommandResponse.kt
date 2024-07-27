@@ -158,6 +158,9 @@ data class CommandResponse(
                         )
                     ).takeIf { type != END_VOTE },
                     DoorayAttachment(
+                        title = vote.voteTitle,
+                    ).takeIf { type == END_VOTE },
+                    DoorayAttachment(
                         callbackId = "${vote.voteNo}",
                         title = vote.voteTitle,
                         text = "최대 ${vote.selectableItemCnt}개까지 고를 수 있습니다.",
