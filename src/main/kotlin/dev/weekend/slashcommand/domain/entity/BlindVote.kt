@@ -20,6 +20,8 @@ data class BlindVote(
 
     var voteTitle: String,
 
+    var voteLink: String? = null,
+
     var selectableItemCnt: Int,
 
     val userId: Long,
@@ -32,6 +34,12 @@ data class BlindVote(
         voteTitle: String,
     ) {
         this.voteTitle = voteTitle
+    }
+
+    fun updateLink(
+        voteLink: String?,
+    ) {
+        this.voteLink = voteLink
     }
 
     fun updateSelectableItemCnt(

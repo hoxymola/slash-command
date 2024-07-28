@@ -68,6 +68,7 @@ class CommandService(
             CHECK_VOTE -> request.checkVote()
             VOTE -> request.vote()
             END_VOTE -> request.endVote()
+            else -> throw IllegalStateException()
         }
     }
 
@@ -82,6 +83,7 @@ class CommandService(
                 submitLabel = "저장",
                 type = CHANGE_TITLE,
                 value = vote.voteTitle,
+                linkValue = vote.voteLink,
             )
         }
 
@@ -94,6 +96,7 @@ class CommandService(
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
 
             vote.updateTitle(submission.getValue(CHANGE_TITLE))
+            vote.updateLink(submission[LINK])
 
             runBlocking {
                 doorayClient.sendHook(
@@ -135,6 +138,7 @@ class CommandService(
             BlindVoteItem.createBy(
                 vote = vote,
                 voteItemName = submission.getValue(ADD_ITEM),
+                voteItemLink = submission[LINK],
             ).let { blindVoteItemRepository.save(it) }
                 .also { voteItems.add(it) }
             vote.updateSelectableItemCnt(voteItems.size)
@@ -167,6 +171,7 @@ class CommandService(
                 submitLabel = "저장",
                 type = CHANGE_ITEM,
                 value = voteItem.voteItemName,
+                linkValue = voteItem.voteItemLink,
             )
         }
 
@@ -178,8 +183,10 @@ class CommandService(
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo).toMutableList()
 
-            voteItems.first { it.voteItemNo == voteItemNo }
-                .updateName(submission.getValue(CHANGE_ITEM))
+            voteItems.first { it.voteItemNo == voteItemNo }.apply {
+                updateName(submission.getValue(CHANGE_ITEM))
+                updateLink(submission[LINK])
+            }
 
             runBlocking {
                 doorayClient.sendHook(
@@ -324,6 +331,7 @@ class CommandService(
         submitLabel: String,
         type: VoteInteractionType,
         value: String? = null,
+        linkValue: String? = null,
     ) {
         runBlocking {
             doorayClient.openDialog(
@@ -340,9 +348,18 @@ class CommandService(
                         submitLabel = submitLabel,
                         elements = listOf(
                             DoorayElement(
+                                label = "이름",
                                 name = type.name,
                                 value = value,
                             ),
+                            DoorayElement(
+                                subType = "url",
+                                label = "링크",
+                                name = "LINK",
+                                value = linkValue,
+                                maxLength = 500,
+                                optional = true,
+                            )
                         ),
                     ),
                 ),
