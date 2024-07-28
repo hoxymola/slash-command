@@ -18,11 +18,11 @@ data class BlindVote(
     @JoinColumn(name = "vote_emoji_no")
     val voteEmoji: BlindVoteEmoji,
 
-    var voteTitle: String,
+    var voteTitle: String = "",
 
-    var voteLink: String? = null,
+    var voteLink: String? = "",
 
-    var selectableItemCnt: Int,
+    var selectableItemCnt: Int = 0,
 
     val userId: Long,
 
@@ -56,16 +56,12 @@ data class BlindVote(
 
     companion object {
         fun createBy(
-            voteTitle: String = "",
             emoji: BlindVoteEmoji,
-            selectableItemCnt: Int = 0,
             userId: String,
             tenantId: String,
             responseUrl: String,
         ) = BlindVote(
-            voteTitle = voteTitle,
             voteEmoji = emoji,
-            selectableItemCnt = selectableItemCnt,
             userId = userId.toLong(),
             tenantId = tenantId.toLong(),
             responseUrl = responseUrl,

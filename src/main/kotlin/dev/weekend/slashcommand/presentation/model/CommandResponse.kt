@@ -146,10 +146,14 @@ data class CommandResponse(
                     ).takeIf { type != END_VOTE },
                     DoorayAttachment(
                         title = vote.voteTitle,
+                        titleLink = vote.voteLink,
                     ).takeIf { type == END_VOTE },
                     DoorayAttachment(
                         callbackId = "${vote.voteNo}",
                         title = vote.voteTitle,
+                        //                        titleLink = vote.voteLink,
+                        authorName = "link".takeIf { !vote.voteLink.isNullOrEmpty() },
+                        authorLink = vote.voteLink,
                         text = "최대 ${vote.selectableItemCnt}개까지 고를 수 있습니다.",
                         actions = voteItems.map {
                             DoorayAction.createButton(
@@ -159,20 +163,19 @@ data class CommandResponse(
                             )
                         },
                     ).takeIf { type != END_VOTE },
+                ) + voteItems.let { items ->
+                    when (type) {
+                        END_VOTE -> items.sortedByDescending { it.voteCnt }
+                        else -> items.sortedBy { it.voteItemNo }
+                    }
+                }.map { item ->
                     DoorayAttachment(
-                        callbackId = "${vote.voteNo}",
-                        fields = voteItems.let { items ->
-                            when (type) {
-                                END_VOTE -> items.sortedByDescending { it.voteCnt }
-                                else -> items.sortedBy { it.voteItemNo }
-                            }
-                        }.map { item ->
-                            DoorayField(
-                                title = item.voteItemName + " 🥇".takeIf { isGoldMedal(item.voteCnt) }.orEmpty(),
-                                value = "${vote.voteEmoji.emoji.repeat(item.voteCnt)} (${item.voteCnt})",
-                            )
-                        },
-                    ),
+                        callbackId = "${vote.voteNo}:${item.voteItemNo}",
+                        title = item.voteItemName + " 🥇".takeIf { isGoldMedal(item.voteCnt) }.orEmpty(),
+                        titleLink = item.voteItemLink,
+                        text = "${vote.voteEmoji.emoji.repeat(item.voteCnt)} (${item.voteCnt})",
+                    )
+                } + listOfNotNull(
                     DoorayAttachment(
                         callbackId = "${vote.voteNo}",
                         title = "총 투표자 수: " + voteMembers.distinctBy { it.userId }.size,
