@@ -11,6 +11,6 @@ data class DoorayElement(
     val name: String,
     val value: String?,
     val minLength: Int = 1,
-    val maxLength: Int = 100,
+    val maxLength: Int = 150,
     val optional: Boolean = false,
 )

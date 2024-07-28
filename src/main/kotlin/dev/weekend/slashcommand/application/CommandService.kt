@@ -357,7 +357,6 @@ class CommandService(
                                 label = "링크",
                                 name = "LINK",
                                 value = linkValue,
-                                maxLength = 500,
                                 optional = true,
                             )
                         ),
