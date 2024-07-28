@@ -20,12 +20,20 @@ data class BlindVoteItem(
 
     var voteItemName: String,
 
+    var voteItemLink: String?,
+
     var voteCnt: Int = 0,
 ) : BaseTimeEntity() {
     fun updateName(
         voteItemName: String,
     ) {
         this.voteItemName = voteItemName
+    }
+
+    fun updateLink(
+        voteItemLink: String?,
+    ) {
+        this.voteItemLink = voteItemLink
     }
 
     fun increaseCnt() {
@@ -40,9 +48,11 @@ data class BlindVoteItem(
         fun createBy(
             vote: BlindVote,
             voteItemName: String,
+            voteItemLink: String?,
         ) = BlindVoteItem(
             vote = vote,
             voteItemName = voteItemName,
+            voteItemLink = voteItemLink,
         )
     }
 }
