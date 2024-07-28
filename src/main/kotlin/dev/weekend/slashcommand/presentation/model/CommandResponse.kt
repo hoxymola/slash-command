@@ -55,7 +55,7 @@ data class CommandResponse(
                             text = "수정",
                         ),
                     ),
-                    color = "orange",
+                    color = "black",
                 ),
                 DoorayAttachment(
                     callbackId = "${vote.voteNo}",
@@ -87,7 +87,7 @@ data class CommandResponse(
                             },
                         ),
                     ),
-                    color = "orange",
+                    color = "black",
                 ),
                 DoorayAttachment(
                     callbackId = "${vote.voteNo}",
@@ -102,7 +102,7 @@ data class CommandResponse(
                             text = "취소",
                         ),
                     ),
-                    color = "orange",
+                    color = "black",
                 ),
             ),
             channelId = channelId,
@@ -145,12 +145,12 @@ data class CommandResponse(
                                 text = "내 선택 확인하기",
                             )
                         ),
-                        color = "orange",
+                        color = "black",
                     ).takeIf { type != END_VOTE },
                     DoorayAttachment(
                         title = vote.voteTitle,
                         titleLink = vote.voteLink,
-                        color = "orange",
+                        color = "black",
                     ).takeIf { type == END_VOTE },
                     DoorayAttachment(
                         callbackId = "${vote.voteNo}",
@@ -164,7 +164,7 @@ data class CommandResponse(
                                 value = "${it.voteItemNo}",
                             )
                         },
-                        color = "orange",
+                        color = "black",
                     ).takeIf { type != END_VOTE },
                 ) + voteItems.let { items ->
                     when (type) {
@@ -182,7 +182,7 @@ data class CommandResponse(
                     DoorayAttachment(
                         callbackId = "${vote.voteNo}",
                         title = "총 투표자 수: " + voteMembers.distinctBy { it.userId }.size,
-                        color = "orange",
+                        color = "black",
                     ),
                     DoorayAttachment(
                         callbackId = "${vote.voteNo}",
@@ -192,7 +192,7 @@ data class CommandResponse(
                                 text = "투표 종료!",
                             )
                         ),
-                        color = "orange",
+                        color = "black",
                     ).takeIf { type != END_VOTE },
                 ),
                 channelId = channelId,
