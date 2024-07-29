@@ -80,10 +80,10 @@ class CommandService(
 
             openDialog(
                 title = "제목 수정",
-                submitLabel = "저장",
                 type = CHANGE_TITLE,
                 value = vote.voteTitle,
                 linkValue = vote.voteLink,
+                label = "제목",
             )
         }
 
@@ -97,6 +97,9 @@ class CommandService(
 
             vote.updateTitle(submission.getValue(CHANGE_TITLE))
             vote.updateLink(submission[LINK])
+            voteItems.forEach {
+                it.updateVoteTitle(submission.getValue(CHANGE_TITLE))
+            }
 
             runBlocking {
                 doorayClient.sendHook(
@@ -122,8 +125,8 @@ class CommandService(
 
             openDialog(
                 title = "항목 추가",
-                submitLabel = "저장",
                 type = ADD_ITEM,
+                label = "항목",
             )
         }
 
@@ -168,10 +171,10 @@ class CommandService(
 
             openDialog(
                 title = "항목 수정",
-                submitLabel = "저장",
                 type = CHANGE_ITEM,
                 value = voteItem.voteItemName,
                 linkValue = voteItem.voteItemLink,
+                label = "항목",
             )
         }
 
@@ -328,10 +331,10 @@ class CommandService(
 
     private fun VoteUpdateRequest.openDialog(
         title: String,
-        submitLabel: String,
         type: VoteInteractionType,
         value: String? = null,
         linkValue: String? = null,
+        label: String,
     ) {
         runBlocking {
             doorayClient.openDialog(
@@ -345,18 +348,19 @@ class CommandService(
                     dialog = DoorayDialog(
                         callbackId = "$callbackId:$actionValue",
                         title = title,
-                        submitLabel = submitLabel,
                         elements = listOf(
                             DoorayElement(
-                                label = "이름",
+                                label = "$label (필수)",
                                 name = type.name,
                                 value = value,
+                                placeholder = "투표 ${label}을 입력해 주세요.",
                             ),
                             DoorayElement(
                                 subType = "url",
-                                label = "링크",
+                                label = "링크 (선택)",
                                 name = "LINK",
                                 value = linkValue,
+                                placeholder = "클릭 시 이동할 링크를 입력해 주세요.",
                                 optional = true,
                             )
                         ),

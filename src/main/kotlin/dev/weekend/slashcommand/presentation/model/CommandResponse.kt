@@ -12,7 +12,6 @@ import dev.weekend.slashcommand.domain.enums.VoteInteractionType
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType.*
 import dev.weekend.slashcommand.domain.model.DoorayAction
 import dev.weekend.slashcommand.domain.model.DoorayAttachment
-import dev.weekend.slashcommand.domain.model.DoorayField
 import dev.weekend.slashcommand.domain.model.DoorayOption
 
 /**
@@ -56,6 +55,7 @@ data class CommandResponse(
                             text = "수정",
                         ),
                     ),
+                    color = "orange",
                 ),
                 DoorayAttachment(
                     callbackId = "${vote.voteNo}",
@@ -87,6 +87,7 @@ data class CommandResponse(
                             },
                         ),
                     ),
+                    color = "orange",
                 ),
                 DoorayAttachment(
                     callbackId = "${vote.voteNo}",
@@ -101,6 +102,7 @@ data class CommandResponse(
                             text = "취소",
                         ),
                     ),
+                    color = "orange",
                 ),
             ),
             channelId = channelId,
@@ -142,18 +144,18 @@ data class CommandResponse(
                                 name = CHECK_VOTE,
                                 text = "내 선택 확인하기",
                             )
-                        )
+                        ),
+                        color = "orange",
                     ).takeIf { type != END_VOTE },
                     DoorayAttachment(
                         title = vote.voteTitle,
                         titleLink = vote.voteLink,
+                        color = "orange",
                     ).takeIf { type == END_VOTE },
                     DoorayAttachment(
                         callbackId = "${vote.voteNo}",
                         title = vote.voteTitle,
-                        //                        titleLink = vote.voteLink,
-                        authorName = "link".takeIf { !vote.voteLink.isNullOrEmpty() },
-                        authorLink = vote.voteLink,
+                        titleLink = vote.voteLink,
                         text = "최대 ${vote.selectableItemCnt}개까지 고를 수 있습니다.",
                         actions = voteItems.map {
                             DoorayAction.createButton(
@@ -162,6 +164,7 @@ data class CommandResponse(
                                 value = "${it.voteItemNo}",
                             )
                         },
+                        color = "orange",
                     ).takeIf { type != END_VOTE },
                 ) + voteItems.let { items ->
                     when (type) {
@@ -179,6 +182,7 @@ data class CommandResponse(
                     DoorayAttachment(
                         callbackId = "${vote.voteNo}",
                         title = "총 투표자 수: " + voteMembers.distinctBy { it.userId }.size,
+                        color = "orange",
                     ),
                     DoorayAttachment(
                         callbackId = "${vote.voteNo}",
@@ -187,7 +191,8 @@ data class CommandResponse(
                                 name = END_VOTE,
                                 text = "투표 종료!",
                             )
-                        )
+                        ),
+                        color = "orange",
                     ).takeIf { type != END_VOTE },
                 ),
                 channelId = channelId,

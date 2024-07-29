@@ -18,12 +18,20 @@ data class BlindVoteItem(
     @JoinColumn(name = "vote_no")
     val vote: BlindVote,
 
+    var voteTitle: String?,
+
     var voteItemName: String,
 
     var voteItemLink: String?,
 
     var voteCnt: Int = 0,
 ) : BaseTimeEntity() {
+    fun updateVoteTitle(
+        voteTitle: String?,
+    ) {
+        this.voteTitle = voteTitle
+    }
+
     fun updateName(
         voteItemName: String,
     ) {
@@ -51,6 +59,7 @@ data class BlindVoteItem(
             voteItemLink: String?,
         ) = BlindVoteItem(
             vote = vote,
+            voteTitle = vote.voteTitle,
             voteItemName = voteItemName,
             voteItemLink = voteItemLink,
         )
