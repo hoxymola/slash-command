@@ -95,10 +95,10 @@ class CommandService(
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
 
-            vote.updateTitle(submission.getValue(CHANGE_TITLE))
-            vote.updateLink(submission[LINK].takeIf { !it.isNullOrEmpty() })
+            vote.updateTitle(voteTitle)
+            vote.updateLink(voteLink.takeIf { !it.isNullOrEmpty() })
             voteItems.forEach {
-                it.updateVoteTitle(submission.getValue(CHANGE_TITLE))
+                it.updateVoteTitle(voteTitle)
             }
 
             runBlocking {
@@ -140,8 +140,8 @@ class CommandService(
 
             BlindVoteItem.createBy(
                 vote = vote,
-                voteItemName = submission.getValue(ADD_ITEM),
-                voteItemLink = submission[LINK].takeIf { !it.isNullOrEmpty() },
+                voteItemName = voteItem,
+                voteItemLink = voteLink.takeIf { !it.isNullOrEmpty() },
             ).let { blindVoteItemRepository.save(it) }
                 .also { voteItems.add(it) }
             vote.updateSelectableItemCnt(voteItems.size)
@@ -187,8 +187,8 @@ class CommandService(
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo).toMutableList()
 
             voteItems.first { it.voteItemNo == voteItemNo }.apply {
-                updateName(submission.getValue(CHANGE_ITEM))
-                updateLink(submission[LINK].takeIf { !it.isNullOrEmpty() })
+                updateName(voteItem)
+                updateLink(voteLink.takeIf { !it.isNullOrEmpty() })
             }
 
             runBlocking {
