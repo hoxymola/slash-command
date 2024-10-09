@@ -25,7 +25,11 @@ data class VoteUpdateRequest(
 ) {
     val voteNo = callbackId.substringBefore(':').toLong()
     val voteItemNo = callbackId.substringAfter(':').toLongOrNull()
-    val voteTitle = submission[CHANGE_TITLE]?.trim() ?: throw NotFoundException()
-    val voteLink = submission[LINK]
-    val voteItem = (submission[ADD_ITEM] ?: submission[CHANGE_ITEM])?.trim() ?: throw NotFoundException()
+
+    val voteTitle
+        get() = submission[CHANGE_TITLE]?.trim() ?: throw NotFoundException()
+    val voteLink
+        get() = submission[LINK]
+    val voteItem
+        get() = (submission[ADD_ITEM] ?: submission[CHANGE_ITEM])?.trim() ?: throw NotFoundException()
 }
