@@ -6,9 +6,12 @@ package dev.weekend.slashcommand.domain.model
 
 data class DoorayElement(
     val type: String = "text",
+    val subType: String? = null,
     val label: String = "",
     val name: String,
     val value: String?,
     val minLength: Int = 1,
-    val maxLength: Int = 100,
+    val maxLength: Int = 150,
+    val placeholder: String? = null,
+    val optional: Boolean = false,
 )

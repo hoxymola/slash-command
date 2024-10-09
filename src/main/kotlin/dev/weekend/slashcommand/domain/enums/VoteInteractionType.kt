@@ -17,5 +17,6 @@ enum class VoteInteractionType {
     CHECK_VOTE,
     VOTE,
     END_VOTE,
+    LINK,
     ;
 }
