@@ -96,7 +96,7 @@ class CommandService(
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
 
             vote.updateTitle(submission.getValue(CHANGE_TITLE))
-            vote.updateLink(submission[LINK])
+            vote.updateLink(submission[LINK].takeIf { !it.isNullOrEmpty() })
             voteItems.forEach {
                 it.updateVoteTitle(submission.getValue(CHANGE_TITLE))
             }
@@ -141,7 +141,7 @@ class CommandService(
             BlindVoteItem.createBy(
                 vote = vote,
                 voteItemName = submission.getValue(ADD_ITEM),
-                voteItemLink = submission[LINK],
+                voteItemLink = submission[LINK].takeIf { !it.isNullOrEmpty() },
             ).let { blindVoteItemRepository.save(it) }
                 .also { voteItems.add(it) }
             vote.updateSelectableItemCnt(voteItems.size)
@@ -188,7 +188,7 @@ class CommandService(
 
             voteItems.first { it.voteItemNo == voteItemNo }.apply {
                 updateName(submission.getValue(CHANGE_ITEM))
-                updateLink(submission[LINK])
+                updateLink(submission[LINK].takeIf { !it.isNullOrEmpty() })
             }
 
             runBlocking {
@@ -227,7 +227,7 @@ class CommandService(
         val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
 
         return when {
-            vote.voteTitle.isEmpty() -> CommandResponse.createResponse(
+            vote.voteTitle.isNullOrEmpty() -> CommandResponse.createResponse(
                 text = "투표 제목을 입력해 주세요. 🥸",
                 replaceOriginal = false,
             )
@@ -273,15 +273,32 @@ class CommandService(
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
             val voteMembers = blindVoteMemberRepository.findByVoteVoteNo(vote.voteNo).toMutableList()
 
+            // 투표하려는 항목
             val targetItem = voteItems.first { it.voteItemNo == actionValue?.toLong() }
+
+            // 해당 항목에 투표한 나의 표 (투표하지 않았다면 NULL)
             val targetMember = voteMembers.firstOrNull {
                 it.userId == user.id.toLong() && it.voteItem.voteItemNo == targetItem.voteItemNo
             }
 
-            if (targetMember == null) {
+            if (targetMember == null) { // 해당 항목에 투표하지 않은 경우
                 val selectedItemCount = voteMembers.count { it.userId == user.id.toLong() }
 
-                if (vote.selectableItemCnt > selectedItemCount) {
+                if (vote.selectableItemCnt > selectedItemCount) { // 투표할 수 있는 개수보다 적게 투표한 경우
+                    targetItem.increaseCnt()
+                    BlindVoteMember.createBy(
+                        vote = vote,
+                        voteItem = targetItem,
+                        userId = user.id.toLong(),
+                    ).let { blindVoteMemberRepository.save(it) }
+                        .also { voteMembers.add(it) }
+                } else if (vote.selectableItemCnt == 1) { // 투표할 수 있는 개수가 1개이고, 나의 투표수도 1인 경우
+                    val previousVoteMember = voteMembers.first { it.userId == user.id.toLong() }
+                    val previousVoteItem = voteItems.first { it.voteItemNo == previousVoteMember.voteItem.voteItemNo }
+                    previousVoteItem.decreaseCnt()
+                    blindVoteMemberRepository.delete(previousVoteMember)
+                    voteMembers.remove(previousVoteMember)
+
                     targetItem.increaseCnt()
                     BlindVoteMember.createBy(
                         vote = vote,
@@ -290,7 +307,7 @@ class CommandService(
                     ).let { blindVoteMemberRepository.save(it) }
                         .also { voteMembers.add(it) }
                 }
-            } else {
+            } else { // 해당 항목에 이미 투표한 경우
                 targetItem.decreaseCnt()
                 blindVoteMemberRepository.delete(targetMember)
                 voteMembers.remove(targetMember)

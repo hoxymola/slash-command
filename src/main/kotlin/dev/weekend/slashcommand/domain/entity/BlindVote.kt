@@ -18,9 +18,9 @@ data class BlindVote(
     @JoinColumn(name = "vote_emoji_no")
     val voteEmoji: BlindVoteEmoji,
 
-    var voteTitle: String = "",
+    var voteTitle: String? = null,
 
-    var voteLink: String? = "",
+    var voteLink: String? = null,
 
     var selectableItemCnt: Int = 0,
 
