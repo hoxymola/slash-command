@@ -12,5 +12,5 @@ data class DoorayAttachment(
     val actions: List<DoorayAction>? = null,
     val imageUrl: String? = null,
     val text: String? = null,
-    val color: String = "blue",
+    val color: String = "orange",
 )
