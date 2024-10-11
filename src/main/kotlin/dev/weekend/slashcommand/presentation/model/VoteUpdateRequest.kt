@@ -1,9 +1,11 @@
 package dev.weekend.slashcommand.presentation.model
 
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType
+import dev.weekend.slashcommand.domain.enums.VoteInteractionType.*
 import dev.weekend.slashcommand.domain.model.DoorayChannel
 import dev.weekend.slashcommand.domain.model.DoorayTenant
 import dev.weekend.slashcommand.domain.model.DoorayUser
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException
 
 /**
  * @author Jaeguk Cho
@@ -23,4 +25,7 @@ data class VoteUpdateRequest(
 ) {
     val voteNo = callbackId.substringBefore(':').toLong()
     val voteItemNo = callbackId.substringAfter(':').toLongOrNull()
+    val voteTitle = submission[CHANGE_TITLE]?.trim() ?: throw NotFoundException()
+    val voteLink = submission[LINK]
+    val voteItem = (submission[ADD_ITEM] ?: submission[CHANGE_ITEM])?.trim() ?: throw NotFoundException()
 }
