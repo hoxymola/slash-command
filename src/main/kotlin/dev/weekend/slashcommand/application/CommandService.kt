@@ -63,6 +63,7 @@ class CommandService(
             OPEN_ITEM_ADD_DIALOG -> request.openItemAddDialog()
             ADD_ITEM -> request.addItem()
             CHANGE_SELECTABLE_ITEM_COUNT -> request.changeSelectableItemCount()
+            CHANGE_SHOW_PROGRESS_YN -> request.changeShowProgressYn()
             START_VOTE -> request.startVote()
             CANCEL_VOTE -> request.cancelVote()
             CHECK_VOTE -> request.checkVote()
@@ -214,6 +215,21 @@ class CommandService(
             val selectableItemCount = actionValue?.toInt() ?: 0
 
             vote.updateSelectableItemCnt(selectableItemCount)
+
+            CommandResponse.createFormBy(
+                vote = vote,
+                voteItems = voteItems,
+            )
+        } ?: CommandResponse.createResponse()
+    }
+
+    private fun VoteUpdateRequest.changeShowProgressYn(): CommandResponse {
+        return transactionTemplate.execute {
+            val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
+            val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
+            val showProgressYn = actionValue ?: "Y"
+
+            vote.updateShowProgressYn(showProgressYn)
 
             CommandResponse.createFormBy(
                 vote = vote,
