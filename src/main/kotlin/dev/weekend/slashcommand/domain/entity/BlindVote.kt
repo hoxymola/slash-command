@@ -18,18 +18,24 @@ data class BlindVote(
     @JoinColumn(name = "vote_emoji_no")
     val voteEmoji: BlindVoteEmoji,
 
-    var voteTitle: String? = null,
-
-    var voteLink: String? = null,
-
-    var selectableItemCnt: Int = 0,
-
     val userId: Long,
 
     val tenantId: Long,
 
     var responseUrl: String,
 ) : BaseTimeEntity() {
+    var voteTitle: String? = null
+        private set
+
+    var voteLink: String? = null
+        private set
+
+    var selectableItemCnt: Int = 0
+        private set
+
+    var showProgressYn: String = "Y"
+        private set
+
     fun updateTitle(
         voteTitle: String,
     ) {
@@ -46,6 +52,12 @@ data class BlindVote(
         selectableItemCnt: Int,
     ) {
         this.selectableItemCnt = selectableItemCnt
+    }
+
+    fun updateShowProgressYn(
+        showProgressYn: String,
+    ) {
+        this.showProgressYn = showProgressYn
     }
 
     fun updateResponseUrl(

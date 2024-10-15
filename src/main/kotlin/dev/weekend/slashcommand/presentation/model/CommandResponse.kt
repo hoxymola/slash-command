@@ -70,6 +70,7 @@ data class CommandResponse(
                         name = OPEN_ITEM_ADD_DIALOG,
                         text = "+",
                     ),
+                    color = "orange",
                 ),
                 DoorayAttachment(
                     callbackId = "${vote.voteNo}",
@@ -85,6 +86,28 @@ data class CommandResponse(
                                     value = "$it",
                                 )
                             },
+                        ),
+                    ),
+                    color = "black",
+                ),
+                DoorayAttachment(
+                    callbackId = "${vote.voteNo}",
+                    title = "투표 진행 과정 공개 여부",
+                    actions = listOf(
+                        DoorayAction(
+                            type = SELECT.value,
+                            name = CHANGE_SHOW_PROGRESS_YN,
+                            text = "공개",
+                            options = listOf(
+                                DoorayOption(
+                                    text = "공개",
+                                    value = "Y",
+                                ),
+                                DoorayOption(
+                                    text = "비공개",
+                                    value = "N",
+                                ),
+                            ),
                         ),
                     ),
                     color = "black",
@@ -172,12 +195,23 @@ data class CommandResponse(
                         else -> items.sortedBy { it.voteItemNo }
                     }
                 }.map { item ->
-                    DoorayAttachment(
-                        callbackId = "${vote.voteNo}:${item.voteItemNo}",
-                        title = item.voteItemName + " 🥇".takeIf { isGoldMedal(item.voteCnt) }.orEmpty(),
-                        titleLink = item.voteItemLink,
-                        text = "${vote.voteEmoji.emoji.repeat(item.voteCnt)} (${item.voteCnt})",
-                    )
+                    if (vote.showProgressYn == "N" && type != END_VOTE) {
+                        DoorayAttachment(
+                            callbackId = "${vote.voteNo}:${item.voteItemNo}",
+                            title = item.voteItemName,
+                            titleLink = item.voteItemLink,
+                            text = "투표 종료 후 결과를 확인해 주세요. 🤫",
+                            color = "orange",
+                        )
+                    } else {
+                        DoorayAttachment(
+                            callbackId = "${vote.voteNo}:${item.voteItemNo}",
+                            title = item.voteItemName + " 🥇".takeIf { isGoldMedal(item.voteCnt) }.orEmpty(),
+                            titleLink = item.voteItemLink,
+                            text = "${vote.voteEmoji.emoji.repeat(item.voteCnt)} (${item.voteCnt})",
+                            color = "orange",
+                        )
+                    }
                 } + listOfNotNull(
                     DoorayAttachment(
                         callbackId = "${vote.voteNo}",
