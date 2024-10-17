@@ -160,6 +160,11 @@ data class CommandResponse(
                 attachments = listOfNotNull(
                     DoorayAttachment(
                         callbackId = "${vote.voteNo}",
+                        text = "결과는 투표 종료 후 공개됩니다. 🤫",
+                        color = "black",
+                    ).takeIf { !vote.showProgress() && type != END_VOTE },
+                    DoorayAttachment(
+                        callbackId = "${vote.voteNo}",
                         actions = listOf(
                             DoorayAction.createButton(
                                 name = CHECK_VOTE,
@@ -168,11 +173,6 @@ data class CommandResponse(
                         ),
                         color = "black",
                     ).takeIf { type != END_VOTE },
-                    DoorayAttachment(
-                        callbackId = "${vote.voteNo}",
-                        text = "결과는 투표 종료 후 공개됩니다. 🤫",
-                        color = "black",
-                    ).takeIf { !vote.showProgress() && type != END_VOTE },
                     DoorayAttachment(
                         title = vote.voteTitle,
                         titleLink = vote.voteLink,
