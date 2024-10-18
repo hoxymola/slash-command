@@ -5,6 +5,7 @@ import dev.weekend.slashcommand.domain.entity.BlindVote
 import dev.weekend.slashcommand.domain.entity.BlindVoteItem
 import dev.weekend.slashcommand.domain.entity.BlindVoteMember
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.EPHEMERAL
+import dev.weekend.slashcommand.domain.enums.DoorayResponseType.IN_CHANNEL
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType.*
 import dev.weekend.slashcommand.domain.model.DoorayDialog
@@ -256,6 +257,7 @@ class CommandService(
             else -> CommandResponse.createVoteBy(
                 vote = vote,
                 voteItems = voteItems,
+                responseType = IN_CHANNEL,
                 deleteOriginal = true,
                 type = START_VOTE,
                 userId = user.id.toLong(),
@@ -333,6 +335,7 @@ class CommandService(
                 vote = vote,
                 voteItems = voteItems,
                 voteMembers = voteMembers,
+                responseType = IN_CHANNEL,
                 replaceOriginal = true,
                 type = VOTE,
                 userId = user.id.toLong(),
@@ -350,6 +353,7 @@ class CommandService(
                 vote = vote,
                 voteItems = voteItems,
                 voteMembers = voteMembers,
+                responseType = IN_CHANNEL,
                 deleteOriginal = true,
                 type = END_VOTE,
                 userId = user.id.toLong(),

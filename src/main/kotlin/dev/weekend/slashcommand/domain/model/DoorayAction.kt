@@ -16,6 +16,7 @@ data class DoorayAction(
     val value: String? = null,
     val style: String? = null,
     val options: List<DoorayOption>? = null,
+    val displayTargets: List<String> = emptyList(),
 ) {
     companion object {
         fun createButton(
@@ -23,12 +24,14 @@ data class DoorayAction(
             text: String,
             value: String = "",
             style: DoorayButtonStyle? = DEFAULT,
+            displayTargets: List<String> = emptyList(),
         ) = DoorayAction(
             name = name,
             type = BUTTON.value,
             text = text,
             value = value,
             style = style?.value,
+            displayTargets = displayTargets,
         )
     }
 }

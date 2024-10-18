@@ -33,8 +33,9 @@ data class BlindVote(
     var selectableItemCnt: Int = 0
         private set
 
-    var showProgressYn: String = "Y"
-        private set
+    private var showProgressYn: String = "Y"
+
+    fun showProgress() = showProgressYn == "Y"
 
     fun updateTitle(
         voteTitle: String,
