@@ -4,10 +4,10 @@ import dev.weekend.slashcommand.domain.entity.BlindVote
 import dev.weekend.slashcommand.domain.entity.BlindVoteItem
 import dev.weekend.slashcommand.domain.entity.BlindVoteMember
 import dev.weekend.slashcommand.domain.enums.DoorayActionType.SELECT
+import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.DEFAULT
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.PRIMARY
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.EPHEMERAL
-import dev.weekend.slashcommand.domain.enums.DoorayResponseType.IN_CHANNEL
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType.*
 import dev.weekend.slashcommand.domain.model.DoorayAction
@@ -25,6 +25,7 @@ data class CommandResponse(
     val deleteOriginal: Boolean? = null,
     val attachments: List<DoorayAttachment>? = null,
     val channelId: String? = null,
+    val creatorId: Long? = null,
 ) {
     companion object {
         fun createCancelVote() = CommandResponse(
@@ -92,7 +93,7 @@ data class CommandResponse(
                 ),
                 DoorayAttachment(
                     callbackId = "${vote.voteNo}",
-                    title = "투표 진행 과정 공개 여부",
+                    title = "투표 현황 공개 여부",
                     actions = listOf(
                         DoorayAction(
                             type = SELECT.value,
@@ -135,17 +136,14 @@ data class CommandResponse(
             vote: BlindVote,
             voteItems: List<BlindVoteItem>,
             voteMembers: List<BlindVoteMember> = emptyList(),
-            responseType: DoorayResponseType = IN_CHANNEL,
+            responseType: DoorayResponseType,
             replaceOriginal: Boolean? = null,
             deleteOriginal: Boolean? = null,
             type: VoteInteractionType,
             userId: Long,
             channelId: String? = null, // 훅으로 보낼 땐 필수
         ): CommandResponse {
-            val myVote = voteMembers.filter { it.userId == userId }
-                .sortedBy { it.voteItem.voteItemNo }
-                .joinToString(" / ") { it.voteItem.voteItemName }
-                .takeIf { it.isNotEmpty() } ?: "X"
+            val myVotes = voteMembers.filter { it.userId == userId }.map { it.voteItem.voteItemNo }
             val maxVoteCount = voteItems.maxOf { it.voteCnt }
             val isGoldMedal = { count: Int -> count > 0 && count == maxVoteCount }
 
@@ -153,7 +151,7 @@ data class CommandResponse(
                 text = when (type) {
                     START_VOTE, VOTE -> """(dooray://${vote.tenantId}/members/${vote.userId} "member") 님이 투표를 생성했습니다!"""
                     END_VOTE -> """(dooray://${vote.tenantId}/members/${vote.userId} "member") 님이 투표를 종료했습니다!"""
-                    CHECK_VOTE -> "당신의 선택: $myVote"
+                    CHECK_VOTE -> "선택한 항목이 아래에 파란색으로 표시됩니다."
                     else -> "허용되지 않는 상태"
                 },
                 responseType = responseType.value,
@@ -171,6 +169,11 @@ data class CommandResponse(
                         color = "black",
                     ).takeIf { type != END_VOTE },
                     DoorayAttachment(
+                        callbackId = "${vote.voteNo}",
+                        text = "결과는 투표 종료 후 공개됩니다. 🤫",
+                        color = "black",
+                    ).takeIf { !vote.showProgress() && type != END_VOTE },
+                    DoorayAttachment(
                         title = vote.voteTitle,
                         titleLink = vote.voteLink,
                         color = "black",
@@ -185,6 +188,10 @@ data class CommandResponse(
                                 name = VOTE,
                                 text = it.voteItemName,
                                 value = "${it.voteItemNo}",
+                                style = when {
+                                    type == CHECK_VOTE && it.voteItemNo in myVotes -> PRIMARY
+                                    else -> DEFAULT
+                                },
                             )
                         },
                         color = "black",
@@ -195,12 +202,11 @@ data class CommandResponse(
                         else -> items.sortedBy { it.voteItemNo }
                     }
                 }.map { item ->
-                    if (vote.showProgressYn == "N" && type != END_VOTE) {
+                    if (!vote.showProgress() && type != END_VOTE) {
                         DoorayAttachment(
                             callbackId = "${vote.voteNo}:${item.voteItemNo}",
                             title = item.voteItemName,
                             titleLink = item.voteItemLink,
-                            text = "투표 종료 후 결과를 확인해 주세요. 🤫",
                             color = "orange",
                         )
                     } else {
@@ -224,12 +230,16 @@ data class CommandResponse(
                             DoorayAction.createButton(
                                 name = END_VOTE,
                                 text = "투표 종료!",
+                                displayTargets = listOf(
+                                    "creator",
+                                ),
                             )
                         ),
                         color = "black",
                     ).takeIf { type != END_VOTE },
                 ),
                 channelId = channelId,
+                creatorId = vote.userId,
             )
         }
 
