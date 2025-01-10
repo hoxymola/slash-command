@@ -162,7 +162,7 @@ data class CommandResponse(
                         callbackId = "${vote.voteNo}",
                         text = "결과는 투표 종료 후 공개됩니다. 🤫",
                         color = "black",
-                    ).takeIf { !vote.showProgress() && type != END_VOTE },
+                    ).takeIf { !vote.showProgress && type != END_VOTE },
                     DoorayAttachment(
                         callbackId = "${vote.voteNo}",
                         actions = listOf(
@@ -202,7 +202,7 @@ data class CommandResponse(
                         else -> items.sortedBy { it.voteItemNo }
                     }
                 }.map { item ->
-                    if (!vote.showProgress() && type != END_VOTE) {
+                    if (!vote.showProgress && type != END_VOTE) {
                         DoorayAttachment(
                             callbackId = "${vote.voteNo}:${item.voteItemNo}",
                             title = item.voteItemName,

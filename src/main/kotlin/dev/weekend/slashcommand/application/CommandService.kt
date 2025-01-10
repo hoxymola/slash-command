@@ -228,9 +228,9 @@ class CommandService(
         return transactionTemplate.execute {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
-            val showProgressYn = actionValue ?: "Y"
+            val showProgress = actionValue != "N"
 
-            vote.updateShowProgressYn(showProgressYn)
+            vote.updateShowProgress(showProgress)
 
             CommandResponse.createFormBy(
                 vote = vote,

@@ -2,6 +2,7 @@ package dev.weekend.slashcommand.domain.entity
 
 import jakarta.persistence.*
 import jakarta.persistence.GenerationType.IDENTITY
+import org.hibernate.type.YesNoConverter
 
 /**
  * @author Jaeguk Cho
@@ -33,9 +34,9 @@ data class BlindVote(
     var selectableItemCnt: Int = 0
         private set
 
-    private var showProgressYn: String = "Y"
-
-    fun showProgress() = showProgressYn == "Y"
+    @Convert(converter = YesNoConverter::class)
+    @Column(name = "show_progress_yn")
+    var showProgress: Boolean = true
 
     fun updateTitle(
         voteTitle: String,
@@ -55,10 +56,10 @@ data class BlindVote(
         this.selectableItemCnt = selectableItemCnt
     }
 
-    fun updateShowProgressYn(
-        showProgressYn: String,
+    fun updateShowProgress(
+        showProgress: Boolean,
     ) {
-        this.showProgressYn = showProgressYn
+        this.showProgress = showProgress
     }
 
     fun updateResponseUrl(
