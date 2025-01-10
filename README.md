@@ -6,5 +6,4 @@
 ---
 
 ## 1. 익명 투표
-![img_1](https://github.com/user-attachments/assets/8d44d88e-4f94-440e-a53a-4b824a1a41e7) | ![img_2](https://github.com/user-attachments/assets/1c17c11f-ff1c-4aa5-94a5-d1a79d106dcd)
----|---|
+![image](https://github.com/user-attachments/assets/e33cc8a8-98c3-4766-b624-9219c86c24a3)
