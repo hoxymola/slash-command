@@ -5,6 +5,7 @@ import dev.weekend.slashcommand.domain.entity.BlindVote
 import dev.weekend.slashcommand.domain.entity.BlindVoteItem
 import dev.weekend.slashcommand.domain.entity.BlindVoteMember
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.EPHEMERAL
+import dev.weekend.slashcommand.domain.enums.DoorayResponseType.IN_CHANNEL
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType.*
 import dev.weekend.slashcommand.domain.model.DoorayDialog
@@ -227,9 +228,9 @@ class CommandService(
         return transactionTemplate.execute {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
-            val showProgressYn = actionValue ?: "Y"
+            val showProgress = actionValue != "N"
 
-            vote.updateShowProgressYn(showProgressYn)
+            vote.updateShowProgress(showProgress)
 
             CommandResponse.createFormBy(
                 vote = vote,
@@ -256,6 +257,7 @@ class CommandService(
             else -> CommandResponse.createVoteBy(
                 vote = vote,
                 voteItems = voteItems,
+                responseType = IN_CHANNEL,
                 deleteOriginal = true,
                 type = START_VOTE,
                 userId = user.id.toLong(),
@@ -333,6 +335,7 @@ class CommandService(
                 vote = vote,
                 voteItems = voteItems,
                 voteMembers = voteMembers,
+                responseType = IN_CHANNEL,
                 replaceOriginal = true,
                 type = VOTE,
                 userId = user.id.toLong(),
@@ -350,6 +353,7 @@ class CommandService(
                 vote = vote,
                 voteItems = voteItems,
                 voteMembers = voteMembers,
+                responseType = IN_CHANNEL,
                 deleteOriginal = true,
                 type = END_VOTE,
                 userId = user.id.toLong(),
