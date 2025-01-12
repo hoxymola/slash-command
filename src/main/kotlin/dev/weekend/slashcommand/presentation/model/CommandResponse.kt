@@ -6,6 +6,7 @@ import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.DEFAULT
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.PRIMARY
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.EPHEMERAL
+import dev.weekend.slashcommand.domain.enums.MbtiInteractionType.*
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType.*
 import dev.weekend.slashcommand.domain.model.DoorayAction
@@ -28,6 +29,12 @@ data class CommandResponse(
     companion object {
         fun createCancelVote() = CommandResponse(
             text = "투표 생성을 취소했습니다. 🥺",
+            responseType = EPHEMERAL.value,
+            deleteOriginal = true,
+        )
+
+        fun createCancelTest() = CommandResponse(
+            text = "검사를 취소했습니다. 🥺",
             responseType = EPHEMERAL.value,
             deleteOriginal = true,
         )
@@ -238,6 +245,138 @@ data class CommandResponse(
                 ),
                 channelId = channelId,
                 creatorId = vote.userId,
+            )
+        }
+
+        fun createFormBy(
+            mbtiResult: MbtiResult?,
+        ) = CommandResponse(
+            text = "당신의 MBTI: [${mbtiResult?.mbti ?: "🤔"}]",
+            responseType = EPHEMERAL.value,
+            attachments = listOf(
+                DoorayAttachment(
+                    text = "30초만에 나의 MBTI 검사하기",
+                    imageUrl = "https://www.16personalities.com/static/images/teams/type-interactions.svg?v=1",
+                ),
+                DoorayAttachment(
+                    actions = listOf(
+                        DoorayAction.createButton(
+                            name = START_TEST,
+                            text = if (mbtiResult?.mbti == null) {
+                                "검사하기"
+                            } else {
+                                "다시 검사하기"
+                            },
+                        ),
+                        DoorayAction.createButton(
+                            name = CANCEL_TEST,
+                            text = "취소",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        fun createQuestionBy(
+            mbtiTest: MbtiTest,
+        ) = CommandResponse(
+            text = "Q${mbtiTest.question.seq}. ${mbtiTest.question.question}",
+            responseType = EPHEMERAL.value,
+            attachments = listOf(
+                DoorayAttachment(
+                    actions = listOf(
+                        DoorayAction.createButton(
+                            name = FIRST_ANSWER,
+                            text = mbtiTest.question.firstChoice.answer,
+                            value = "${mbtiTest.testNo}:${mbtiTest.question.seq}",
+                            style = when (mbtiTest.answer?.trait == mbtiTest.question.firstChoice.trait) {
+                                true -> PRIMARY
+                                false -> DEFAULT
+                            },
+                        ),
+                    ),
+                ),
+                DoorayAttachment(
+                    actions = listOf(
+                        DoorayAction.createButton(
+                            name = SECOND_ANSWER,
+                            text = mbtiTest.question.secondChoice.answer,
+                            value = "${mbtiTest.testNo}:${mbtiTest.question.seq}",
+                            style = when (mbtiTest.answer?.trait == mbtiTest.question.secondChoice.trait) {
+                                true -> PRIMARY
+                                false -> DEFAULT
+                            },
+                        ),
+                    ),
+                ),
+                DoorayAttachment(
+                    actions = listOf(
+                        DoorayAction.createButton(
+                            name = PREV_QUESTION,
+                            text = "이전",
+                            value = "${mbtiTest.testNo}:${mbtiTest.question.seq}",
+                        ),
+                        DoorayAction.createButton(
+                            name = NEXT_QUESTION,
+                            text = "다음",
+                            value = "${mbtiTest.testNo}:${mbtiTest.question.seq}",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        fun createResultBy(
+            mbtiResult: MbtiResult,
+            mbtiDetail: MbtiDetail,
+        ) = CommandResponse(
+            text = "당신의 MBTI: [${mbtiResult.mbti}]",
+            responseType = EPHEMERAL.value,
+            attachments = listOf(
+                DoorayAttachment(
+                    title = mbtiDetail.alias,
+                    titleLink = mbtiDetail.url,
+                    imageUrl = mbtiDetail.imageUrl,
+                ),
+                DoorayAttachment(
+                    actions = listOf(
+                        DoorayAction.createButton(
+                            name = GET_STATISTICS,
+                            text = "통계 보기",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        fun createStatisticsBy(
+            mbtiResults: List<MbtiResult>,
+            totalCount: Int,
+            responseType: DoorayResponseType,
+            deleteOriginal: Boolean? = null,
+        ): CommandResponse {
+            val results = mbtiResults.groupBy { it.mbti }.mapValues { it.value.size - 1 }.toList()
+                .sortedByDescending { it.second }
+
+            return CommandResponse(
+                text = "NHN 임직원의 MBTI 분포는? 🧐",
+                responseType = responseType.value,
+                deleteOriginal = deleteOriginal,
+                attachments = listOfNotNull(
+                    DoorayAttachment(
+                        text = results.joinToString("\n") {
+                            "${it.first}: ${it.second.toLong() / totalCount * 100}% (${it.second}명)"
+                        },
+                    ),
+                    DoorayAttachment(
+                        actions = listOf(
+                            DoorayAction.createButton(
+                                name = SHARE_STATISTICS,
+                                text = "공유하기",
+                            ),
+                        ),
+                    ).takeIf { responseType == EPHEMERAL },
+                ),
             )
         }
 

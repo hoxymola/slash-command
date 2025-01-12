@@ -18,7 +18,8 @@ class CommandRouter(
         (accept(APPLICATION_JSON) and "/slash-command").nest {
             POST("/blind-vote", commandHandler::createBlindVote)
             POST("/blind-vote/interact", commandHandler::interactBlindVote)
-
+            POST("/mbti", commandHandler::testMbti)
+            POST("/mbti/interact", commandHandler::interactMbti)
         }
     }
 }

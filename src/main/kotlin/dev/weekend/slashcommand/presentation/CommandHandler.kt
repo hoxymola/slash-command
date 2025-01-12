@@ -1,6 +1,8 @@
 package dev.weekend.slashcommand.presentation
 
 import dev.weekend.slashcommand.application.CommandService
+import dev.weekend.slashcommand.presentation.model.MbtiInteractRequest
+import dev.weekend.slashcommand.presentation.model.MbtiTestRequest
 import dev.weekend.slashcommand.presentation.model.VoteCreateRequest
 import dev.weekend.slashcommand.presentation.model.VoteInteractRequest
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +36,24 @@ class CommandHandler(
             val interactRequest = request.awaitBody<VoteInteractRequest>()
 
             commandService.interactBlindVote(interactRequest)
+                .let { ok().bodyValueAndAwait(it) }
+        }
+    }
+
+    suspend fun testMbti(request: ServerRequest): ServerResponse {
+        return withContext(Dispatchers.Default) {
+            val testRequest = request.awaitBody<MbtiTestRequest>()
+
+            commandService.testMbti(testRequest)
+                .let { ok().bodyValueAndAwait(it) }
+        }
+    }
+
+    suspend fun interactMbti(request: ServerRequest): ServerResponse {
+        return withContext(Dispatchers.Default) {
+            val interactRequest = request.awaitBody<MbtiInteractRequest>()
+
+            commandService.interactMbti(interactRequest)
                 .let { ok().bodyValueAndAwait(it) }
         }
     }
