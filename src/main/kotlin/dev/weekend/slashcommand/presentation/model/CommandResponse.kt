@@ -1,8 +1,6 @@
 package dev.weekend.slashcommand.presentation.model
 
-import dev.weekend.slashcommand.domain.entity.BlindVote
-import dev.weekend.slashcommand.domain.entity.BlindVoteItem
-import dev.weekend.slashcommand.domain.entity.BlindVoteMember
+import dev.weekend.slashcommand.domain.entity.*
 import dev.weekend.slashcommand.domain.enums.DoorayActionType.SELECT
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.DEFAULT
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.PRIMARY

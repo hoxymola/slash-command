@@ -4,7 +4,7 @@ package dev.weekend.slashcommand.domain.enums
  * @author Jaeguk Cho
  */
 
-enum class VoteInteractionType {
+enum class VoteInteractionType : InteractionType {
     OPEN_TITLE_CHANGE_DIALOG,
     CHANGE_TITLE,
     OPEN_ITEM_CHANGE_DIALOG,
