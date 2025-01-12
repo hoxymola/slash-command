@@ -2,7 +2,6 @@ package dev.weekend.slashcommand.application
 
 import dev.weekend.slashcommand.application.model.DialogRequest
 import dev.weekend.slashcommand.domain.constant.MbtiConstant.FIRST_QUESTION_SEQ
-import dev.weekend.slashcommand.domain.constant.MbtiConstant.LAST_QUESTION_SEQ
 import dev.weekend.slashcommand.domain.constant.MbtiConstant.MBTI_TYPE_COUNT
 import dev.weekend.slashcommand.domain.entity.*
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.EPHEMERAL
@@ -81,6 +80,7 @@ class CommandService(
         request: MbtiTestRequest
     ): CommandResponse {
         val mbtiResult = mbtiResultRepository.findByUserId(request.userId)
+        val mbtiDetail = mbtiResult?.let { mbtiDetailRepository.findByIdOrNull(it.mbti) }
 
         MbtiTestMapping.createBy(
             userId = request.userId,
@@ -88,6 +88,7 @@ class CommandService(
 
         return CommandResponse.createFormBy(
             mbtiResult = mbtiResult,
+            mbtiDetail = mbtiDetail,
         )
     }
 
@@ -97,10 +98,12 @@ class CommandService(
         return when (request.actionName) {
             START_TEST -> request.startTest()
             CANCEL_TEST -> request.cancelTest()
+            RESTART_TEST -> request.restartTest()
             FIRST_ANSWER -> request.firstAnswer()
             SECOND_ANSWER -> request.secondAnswer()
             PREV_QUESTION -> request.prevQuestion()
             NEXT_QUESTION -> request.nextQuestion()
+            GET_RESULT -> request.getResult()
             GET_STATISTICS -> request.getStatistics()
             SHARE_STATISTICS -> request.shareStatistics()
         }
@@ -176,8 +179,7 @@ class CommandService(
                 vote = vote,
                 voteItemName = voteItem,
                 voteItemLink = voteLink.takeIf { !it.isNullOrEmpty() },
-            ).let { blindVoteItemRepository.save(it) }
-                .also { voteItems.add(it) }
+            ).let { blindVoteItemRepository.save(it) }.also { voteItems.add(it) }
             vote.updateSelectableItemCnt(voteItems.size)
 
             runBlocking {
@@ -340,8 +342,7 @@ class CommandService(
                         vote = vote,
                         voteItem = targetItem,
                         userId = userId,
-                    ).let { blindVoteMemberRepository.save(it) }
-                        .also { voteMembers.add(it) }
+                    ).let { blindVoteMemberRepository.save(it) }.also { voteMembers.add(it) }
                 } else if (vote.selectableItemCnt == 1) { // 투표할 수 있는 개수가 1개이고, 나의 투표수도 1인 경우
                     val previousVoteMember = voteMembers.first { it.userId == userId }
                     val previousVoteItem = voteItems.first { it.voteItemNo == previousVoteMember.voteItem.voteItemNo }
@@ -354,8 +355,7 @@ class CommandService(
                         vote = vote,
                         voteItem = targetItem,
                         userId = userId,
-                    ).let { blindVoteMemberRepository.save(it) }
-                        .also { voteMembers.add(it) }
+                    ).let { blindVoteMemberRepository.save(it) }.also { voteMembers.add(it) }
                 }
             } else { // 해당 항목에 이미 투표한 경우
                 targetItem.decreaseCnt()
@@ -400,8 +400,9 @@ class CommandService(
 
     private fun MbtiInteractRequest.startTest(): CommandResponse {
         val question = mbtiQuestionRepository.getRandomQuestionBySeq(FIRST_QUESTION_SEQ)
-        val testMapping = mbtiTestMappingRepository.findTopByUserIdOrderByTestNoDesc(userId)
-            ?: throw NotFoundException()
+        val testMapping = MbtiTestMapping.createBy(
+            userId = userId,
+        ).also { mbtiTestMappingRepository.save(it) }
 
         val test = MbtiTest.createBy(
             testNo = testMapping.testNo,
@@ -416,6 +417,16 @@ class CommandService(
 
     private fun MbtiInteractRequest.cancelTest(): CommandResponse {
         return CommandResponse.createCancelTest()
+    }
+
+    private fun MbtiInteractRequest.restartTest(): CommandResponse {
+        val mbtiResult = mbtiResultRepository.findByUserId(userId)
+        val mbtiDetail = mbtiResult?.let { mbtiDetailRepository.findByIdOrNull(it.mbti) }
+
+        return CommandResponse.createFormBy(
+            mbtiResult = mbtiResult,
+            mbtiDetail = mbtiDetail,
+        )
     }
 
     private fun MbtiInteractRequest.firstAnswer(): CommandResponse {
@@ -443,80 +454,49 @@ class CommandService(
     }
 
     private fun MbtiInteractRequest.prevQuestion(): CommandResponse {
-        return when {
-            // 첫 번째 문항이 아닌 경우
-            seq != FIRST_QUESTION_SEQ -> {
-                val test =
-                    mbtiTestRepository.findByIdOrNull(MbtiTestKey(testNo, seq - 1)) ?: throw NotFoundException()
+        val test = mbtiTestRepository.findByIdOrNull(MbtiTestKey(testNo, seq - 1)) ?: throw NotFoundException()
 
-                // 이전 질문으로 이동
-                CommandResponse.createQuestionBy(
-                    mbtiTest = test,
-                )
-            }
-
-            // 첫 번째 문항인 경우
-            else -> {
-                CommandResponse.createResponse(
-                    text = "첫 번째 질문입니다. 🥸",
-                    replaceOriginal = false,
-                )
-            }
-        }
+        return CommandResponse.createQuestionBy(
+            mbtiTest = test,
+        )
     }
 
     private fun MbtiInteractRequest.nextQuestion(): CommandResponse {
         val currentTest = mbtiTestRepository.findByIdOrNull(MbtiTestKey(testNo, seq)) ?: throw NotFoundException()
         val nextTest = mbtiTestRepository.findByIdOrNull(MbtiTestKey(testNo, seq + 1))
+        val test = nextTest ?: MbtiTest.createBy(
+            testNo = currentTest.testNo,
+            userId = userId,
+            question = mbtiQuestionRepository.getRandomQuestionBySeq(seq + 1),
+        ).let { mbtiTestRepository.save(it) }
 
-        return when {
-            // 답변을 선택하지 않은 경우
-            currentTest.answer == null -> {
-                CommandResponse.createResponse(
-                    text = "답변을 선택해주세요. 🥸",
-                    replaceOriginal = false,
-                )
-            }
+        return CommandResponse.createQuestionBy(
+            mbtiTest = test,
+        )
+    }
 
-            // 마지막 문항이 아닌 경우
-            seq != LAST_QUESTION_SEQ -> {
-                val test = nextTest ?: MbtiTest.createBy(
-                    testNo = currentTest.testNo,
-                    userId = userId,
-                    question = mbtiQuestionRepository.getRandomQuestionBySeq(seq + 1),
-                ).let { mbtiTestRepository.save(it) }
+    private fun MbtiInteractRequest.getResult(): CommandResponse {
+        return transactionTemplate.execute {
+            val tests = mbtiTestRepository.findByTestNo(testNo)
+            val (firstTrait, secondTrait, thirdTrait, fourthTrait) = tests.mapNotNull { it.answer?.trait }
+            val mbti = MbtiType.getByTraits(
+                firstTrait = firstTrait,
+                secondTrait = secondTrait,
+                thirdTrait = thirdTrait,
+                fourthTrait = fourthTrait,
+            )
+            val mbtiDetail = mbtiDetailRepository.findByIdOrNull(mbti) ?: throw NotFoundException()
+            val prevResult = mbtiResultRepository.findByUserId(userId)
+            val result = prevResult?.apply { updateMbti(mbti) } ?: MbtiResult.createBy(
+                userId = userId,
+                mbti = mbti,
+            ).let { mbtiResultRepository.save(it) }
 
-                CommandResponse.createQuestionBy(
-                    mbtiTest = test,
-                )
-            }
-
-            // 마지막 문항인 경우
-            else -> {
-                transactionTemplate.execute {
-                    val tests = mbtiTestRepository.findByTestNo(testNo)
-                    val (firstTrait, secondTrait, thirdTrait, fourthTrait) = tests.mapNotNull { it.answer?.trait }
-                    val mbti = MbtiType.getByTraits(
-                        firstTrait = firstTrait,
-                        secondTrait = secondTrait,
-                        thirdTrait = thirdTrait,
-                        fourthTrait = fourthTrait,
-                    )
-                    val mbtiDetail = mbtiDetailRepository.findByIdOrNull(mbti) ?: throw NotFoundException()
-                    val prevResult = mbtiResultRepository.findByUserId(userId)
-                    val result = prevResult?.apply { updateMbti(mbti) }
-                        ?: MbtiResult.createBy(
-                            userId = userId,
-                            mbti = mbti,
-                        ).let { mbtiResultRepository.save(it) }
-
-                    CommandResponse.createResultBy(
-                        mbtiResult = result,
-                        mbtiDetail = mbtiDetail,
-                    )
-                } ?: CommandResponse.createResponse()
-            }
-        }
+            CommandResponse.createResultBy(
+                mbtiResult = result,
+                mbtiDetail = mbtiDetail,
+            )
+        } ?: CommandResponse.createResponse()
     }
 
     private fun MbtiInteractRequest.getStatistics(): CommandResponse {
@@ -575,7 +555,7 @@ class CommandService(
                                 value = linkValue,
                                 placeholder = "클릭 시 이동할 링크를 입력해 주세요.",
                                 optional = true,
-                            )
+                            ),
                         ),
                     ),
                 ),
