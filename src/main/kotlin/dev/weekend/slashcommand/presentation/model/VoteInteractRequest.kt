@@ -11,7 +11,7 @@ import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException
  * @author Jaeguk Cho
  */
 
-data class VoteUpdateRequest(
+data class VoteInteractRequest(
     val user: DoorayUser,
     val actionName: VoteInteractionType?, // 대화상자 응답 시에는 null
     val actionValue: String?,
@@ -23,6 +23,7 @@ data class VoteUpdateRequest(
     val responseUrl: String,
     val submission: Map<VoteInteractionType, String> = emptyMap(), // 대화상자 응답 시에만 오는 값
 ) {
+    val userId = user.id.toLong()
     val voteNo = callbackId.substringBefore(':').toLong()
     val voteItemNo = callbackId.substringAfter(':').toLongOrNull()
 

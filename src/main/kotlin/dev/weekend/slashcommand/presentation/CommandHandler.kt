@@ -1,8 +1,8 @@
 package dev.weekend.slashcommand.presentation
 
 import dev.weekend.slashcommand.application.CommandService
-import dev.weekend.slashcommand.presentation.model.FormCreateRequest
-import dev.weekend.slashcommand.presentation.model.VoteUpdateRequest
+import dev.weekend.slashcommand.presentation.model.VoteCreateRequest
+import dev.weekend.slashcommand.presentation.model.VoteInteractRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
@@ -20,20 +20,20 @@ import org.springframework.web.reactive.function.server.bodyValueAndAwait
 class CommandHandler(
     private val commandService: CommandService,
 ) {
-    suspend fun createBlindVoteForm(request: ServerRequest): ServerResponse {
+    suspend fun createBlindVote(request: ServerRequest): ServerResponse {
         return withContext(Dispatchers.Default) {
-            val createRequest = request.awaitBody<FormCreateRequest>()
+            val createRequest = request.awaitBody<VoteCreateRequest>()
 
             commandService.createBlindVote(createRequest)
                 .let { ok().bodyValueAndAwait(it) }
         }
     }
 
-    suspend fun updateBlindVote(request: ServerRequest): ServerResponse {
+    suspend fun interactBlindVote(request: ServerRequest): ServerResponse {
         return withContext(Dispatchers.Default) {
-            val createRequest = request.awaitBody<VoteUpdateRequest>()
+            val interactRequest = request.awaitBody<VoteInteractRequest>()
 
-            commandService.updateBlindVote(createRequest)
+            commandService.interactBlindVote(interactRequest)
                 .let { ok().bodyValueAndAwait(it) }
         }
     }

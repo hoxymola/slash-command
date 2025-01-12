@@ -10,14 +10,9 @@ import dev.weekend.slashcommand.domain.enums.VoteInteractionType
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType.*
 import dev.weekend.slashcommand.domain.model.DoorayDialog
 import dev.weekend.slashcommand.domain.model.DoorayElement
-import dev.weekend.slashcommand.domain.repository.BlindVoteEmojiRepository
-import dev.weekend.slashcommand.domain.repository.BlindVoteItemRepository
-import dev.weekend.slashcommand.domain.repository.BlindVoteMemberRepository
-import dev.weekend.slashcommand.domain.repository.BlindVoteRepository
+import dev.weekend.slashcommand.domain.repository.*
 import dev.weekend.slashcommand.infrastructure.client.DoorayClient
-import dev.weekend.slashcommand.presentation.model.CommandResponse
-import dev.weekend.slashcommand.presentation.model.FormCreateRequest
-import dev.weekend.slashcommand.presentation.model.VoteUpdateRequest
+import dev.weekend.slashcommand.presentation.model.*
 import kotlinx.coroutines.runBlocking
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException
 import org.springframework.data.repository.findByIdOrNull
@@ -38,14 +33,14 @@ class CommandService(
     private val transactionTemplate: TransactionTemplate,
 ) {
     fun createBlindVote(
-        createRequest: FormCreateRequest,
+        request: VoteCreateRequest,
     ): CommandResponse {
         val emoji = blindVoteEmojiRepository.getRandomEmoji()
         val vote = BlindVote.createBy(
             emoji = emoji,
-            userId = createRequest.userId,
-            tenantId = createRequest.tenantId,
-            responseUrl = createRequest.responseUrl,
+            userId = request.userId,
+            tenantId = request.tenantId,
+            responseUrl = request.responseUrl,
         ).let { blindVoteRepository.save(it) }
 
         return CommandResponse.createFormBy(
@@ -53,8 +48,8 @@ class CommandService(
         )
     }
 
-    fun updateBlindVote(
-        request: VoteUpdateRequest,
+    fun interactBlindVote(
+        request: VoteInteractRequest,
     ): CommandResponse {
         return when (request.actionName ?: request.submission.keys.first()) {
             OPEN_TITLE_CHANGE_DIALOG -> request.openTitleChangeDialog()
@@ -74,7 +69,7 @@ class CommandService(
         }
     }
 
-    private fun VoteUpdateRequest.openTitleChangeDialog(): CommandResponse {
+    private fun VoteInteractRequest.openTitleChangeDialog(): CommandResponse {
         transactionTemplate.executeWithoutResult {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
 
@@ -92,7 +87,7 @@ class CommandService(
         return CommandResponse.createResponse()
     }
 
-    private fun VoteUpdateRequest.changeTitle(): CommandResponse {
+    private fun VoteInteractRequest.changeTitle(): CommandResponse {
         transactionTemplate.executeWithoutResult {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
@@ -119,7 +114,7 @@ class CommandService(
         return CommandResponse.createResponse()
     }
 
-    private fun VoteUpdateRequest.openItemAddDialog(): CommandResponse {
+    private fun VoteInteractRequest.openItemAddDialog(): CommandResponse {
         transactionTemplate.executeWithoutResult {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
 
@@ -135,7 +130,7 @@ class CommandService(
         return CommandResponse.createResponse()
     }
 
-    private fun VoteUpdateRequest.addItem(): CommandResponse {
+    private fun VoteInteractRequest.addItem(): CommandResponse {
         transactionTemplate.executeWithoutResult {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo).toMutableList()
@@ -164,7 +159,7 @@ class CommandService(
         return CommandResponse.createResponse()
     }
 
-    private fun VoteUpdateRequest.openItemChangeDialog(): CommandResponse {
+    private fun VoteInteractRequest.openItemChangeDialog(): CommandResponse {
         transactionTemplate.executeWithoutResult {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
             val voteItem = blindVoteItemRepository.findByIdOrNull(actionValue?.toLong()) ?: throw NotFoundException()
@@ -183,7 +178,7 @@ class CommandService(
         return CommandResponse.createResponse()
     }
 
-    private fun VoteUpdateRequest.changeItem(): CommandResponse {
+    private fun VoteInteractRequest.changeItem(): CommandResponse {
         transactionTemplate.executeWithoutResult {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo).toMutableList()
@@ -209,7 +204,7 @@ class CommandService(
         return CommandResponse.createResponse()
     }
 
-    private fun VoteUpdateRequest.changeSelectableItemCount(): CommandResponse {
+    private fun VoteInteractRequest.changeSelectableItemCount(): CommandResponse {
         return transactionTemplate.execute {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
@@ -224,7 +219,7 @@ class CommandService(
         } ?: CommandResponse.createResponse()
     }
 
-    private fun VoteUpdateRequest.changeShowProgressYn(): CommandResponse {
+    private fun VoteInteractRequest.changeShowProgressYn(): CommandResponse {
         return transactionTemplate.execute {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
@@ -239,7 +234,7 @@ class CommandService(
         } ?: CommandResponse.createResponse()
     }
 
-    private fun VoteUpdateRequest.startVote(): CommandResponse {
+    private fun VoteInteractRequest.startVote(): CommandResponse {
         val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
         val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
 
@@ -260,16 +255,16 @@ class CommandService(
                 responseType = IN_CHANNEL,
                 deleteOriginal = true,
                 type = START_VOTE,
-                userId = user.id.toLong(),
+                userId = userId,
             )
         }
     }
 
-    private fun VoteUpdateRequest.cancelVote(): CommandResponse {
+    private fun VoteInteractRequest.cancelVote(): CommandResponse {
         return CommandResponse.createCancelVote()
     }
 
-    private fun VoteUpdateRequest.checkVote(): CommandResponse {
+    private fun VoteInteractRequest.checkVote(): CommandResponse {
         val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
         val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
         val voteMembers = blindVoteMemberRepository.findByVoteVoteNo(vote.voteNo)
@@ -281,11 +276,11 @@ class CommandService(
             responseType = EPHEMERAL,
             replaceOriginal = true,
             type = CHECK_VOTE,
-            userId = user.id.toLong(),
+            userId = userId,
         )
     }
 
-    private fun VoteUpdateRequest.vote(): CommandResponse {
+    private fun VoteInteractRequest.vote(): CommandResponse {
         return transactionTemplate.execute {
             val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
             val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
@@ -296,22 +291,22 @@ class CommandService(
 
             // 해당 항목에 투표한 나의 표 (투표하지 않았다면 NULL)
             val targetMember = voteMembers.firstOrNull {
-                it.userId == user.id.toLong() && it.voteItem.voteItemNo == targetItem.voteItemNo
+                it.userId == userId && it.voteItem.voteItemNo == targetItem.voteItemNo
             }
 
             if (targetMember == null) { // 해당 항목에 투표하지 않은 경우
-                val selectedItemCount = voteMembers.count { it.userId == user.id.toLong() }
+                val selectedItemCount = voteMembers.count { it.userId == userId }
 
                 if (vote.selectableItemCnt > selectedItemCount) { // 투표할 수 있는 개수보다 적게 투표한 경우
                     targetItem.increaseCnt()
                     BlindVoteMember.createBy(
                         vote = vote,
                         voteItem = targetItem,
-                        userId = user.id.toLong(),
+                        userId = userId,
                     ).let { blindVoteMemberRepository.save(it) }
                         .also { voteMembers.add(it) }
                 } else if (vote.selectableItemCnt == 1) { // 투표할 수 있는 개수가 1개이고, 나의 투표수도 1인 경우
-                    val previousVoteMember = voteMembers.first { it.userId == user.id.toLong() }
+                    val previousVoteMember = voteMembers.first { it.userId == userId }
                     val previousVoteItem = voteItems.first { it.voteItemNo == previousVoteMember.voteItem.voteItemNo }
                     previousVoteItem.decreaseCnt()
                     blindVoteMemberRepository.delete(previousVoteMember)
@@ -321,7 +316,7 @@ class CommandService(
                     BlindVoteMember.createBy(
                         vote = vote,
                         voteItem = targetItem,
-                        userId = user.id.toLong(),
+                        userId = userId,
                     ).let { blindVoteMemberRepository.save(it) }
                         .also { voteMembers.add(it) }
                 }
@@ -338,12 +333,12 @@ class CommandService(
                 responseType = IN_CHANNEL,
                 replaceOriginal = true,
                 type = VOTE,
-                userId = user.id.toLong(),
+                userId = userId,
             )
         } ?: CommandResponse.createResponse()
     }
 
-    private fun VoteUpdateRequest.endVote(): CommandResponse {
+    private fun VoteInteractRequest.endVote(): CommandResponse {
         val vote = blindVoteRepository.findByIdOrNull(voteNo) ?: throw NotFoundException()
         val voteItems = blindVoteItemRepository.findByVoteVoteNo(vote.voteNo)
         val voteMembers = blindVoteMemberRepository.findByVoteVoteNo(vote.voteNo)
@@ -356,7 +351,7 @@ class CommandService(
                 responseType = IN_CHANNEL,
                 deleteOriginal = true,
                 type = END_VOTE,
-                userId = user.id.toLong(),
+                userId = userId,
             )
         } else {
             CommandResponse.createResponse(
@@ -366,7 +361,7 @@ class CommandService(
         }
     }
 
-    private fun VoteUpdateRequest.openDialog(
+    private fun VoteInteractRequest.openDialog(
         title: String,
         type: VoteInteractionType,
         value: String? = null,
