@@ -1,5 +1,8 @@
 package dev.weekend.slashcommand.presentation.model
 
+import dev.weekend.slashcommand.domain.constant.MbtiConstant.DEFAULT_IMAGE
+import dev.weekend.slashcommand.domain.constant.MbtiConstant.FIRST_QUESTION_SEQ
+import dev.weekend.slashcommand.domain.constant.MbtiConstant.LAST_QUESTION_SEQ
 import dev.weekend.slashcommand.domain.entity.*
 import dev.weekend.slashcommand.domain.enums.DoorayActionType.SELECT
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.DEFAULT
@@ -250,13 +253,14 @@ data class CommandResponse(
 
         fun createFormBy(
             mbtiResult: MbtiResult?,
+            mbtiDetail: MbtiDetail?,
         ) = CommandResponse(
             text = "당신의 MBTI: [${mbtiResult?.mbti ?: "🤔"}]",
             responseType = EPHEMERAL.value,
             attachments = listOf(
                 DoorayAttachment(
                     text = "30초만에 나의 MBTI 검사하기",
-                    imageUrl = "https://www.16personalities.com/static/images/teams/type-interactions.svg?v=1",
+                    imageUrl = mbtiDetail?.imageUrl ?: DEFAULT_IMAGE,
                 ),
                 DoorayAttachment(
                     actions = listOf(
@@ -310,17 +314,26 @@ data class CommandResponse(
                     ),
                 ),
                 DoorayAttachment(
-                    actions = listOf(
+                    actions = listOfNotNull(
                         DoorayAction.createButton(
-                            name = PREV_QUESTION,
+                            name = when (mbtiTest.question.seq) {
+                                FIRST_QUESTION_SEQ -> RESTART_TEST
+                                else -> PREV_QUESTION
+                            },
                             text = "이전",
                             value = "${mbtiTest.testNo}:${mbtiTest.question.seq}",
                         ),
                         DoorayAction.createButton(
-                            name = NEXT_QUESTION,
-                            text = "다음",
+                            name = when (mbtiTest.question.seq) {
+                                LAST_QUESTION_SEQ -> GET_RESULT
+                                else -> NEXT_QUESTION
+                            },
+                            text = when (mbtiTest.question.seq) {
+                                LAST_QUESTION_SEQ -> "결과 보기"
+                                else -> "다음"
+                            },
                             value = "${mbtiTest.testNo}:${mbtiTest.question.seq}",
-                        ),
+                        ).takeIf { mbtiTest.answer != null },
                     ),
                 ),
             ),
@@ -340,6 +353,10 @@ data class CommandResponse(
                 ),
                 DoorayAttachment(
                     actions = listOf(
+                        DoorayAction.createButton(
+                            name = RESTART_TEST,
+                            text = "다시 검사하기",
+                        ),
                         DoorayAction.createButton(
                             name = GET_STATISTICS,
                             text = "통계 보기",

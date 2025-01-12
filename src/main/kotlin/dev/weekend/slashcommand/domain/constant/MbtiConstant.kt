@@ -8,4 +8,5 @@ object MbtiConstant {
     const val FIRST_QUESTION_SEQ = 1
     const val LAST_QUESTION_SEQ = 4
     const val MBTI_TYPE_COUNT = 16
+    const val DEFAULT_IMAGE = "https://www.16personalities.com/static/images/teams/type-interactions.svg?v=1"
 }
