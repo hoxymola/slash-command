@@ -3,6 +3,7 @@ package dev.weekend.slashcommand.domain.model
 import dev.weekend.slashcommand.domain.enums.DoorayActionType.BUTTON
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.DEFAULT
+import dev.weekend.slashcommand.domain.enums.InteractionType
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType
 
 /**
@@ -20,7 +21,7 @@ data class DoorayAction(
 ) {
     companion object {
         fun createButton(
-            name: VoteInteractionType,
+            name: InteractionType,
             text: String,
             value: String = "",
             style: DoorayButtonStyle? = DEFAULT,
