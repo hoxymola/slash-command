@@ -18,7 +18,7 @@ data class MbtiTestMapping(
     val testNo: Long = 0,
 
     val userId: Long,
-) {
+) : BaseTimeEntity() {
     companion object {
         fun createBy(
             userId: Long,
