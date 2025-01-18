@@ -1,6 +1,9 @@
 package dev.weekend.slashcommand.presentation
 
-import dev.weekend.slashcommand.application.CommandService
+import dev.weekend.slashcommand.application.BlindVoteService
+import dev.weekend.slashcommand.application.MbtiService
+import dev.weekend.slashcommand.presentation.model.MbtiInteractRequest
+import dev.weekend.slashcommand.presentation.model.MbtiTestRequest
 import dev.weekend.slashcommand.presentation.model.VoteCreateRequest
 import dev.weekend.slashcommand.presentation.model.VoteInteractRequest
 import kotlinx.coroutines.Dispatchers
@@ -18,13 +21,14 @@ import org.springframework.web.reactive.function.server.bodyValueAndAwait
 
 @Component
 class CommandHandler(
-    private val commandService: CommandService,
+    private val blindVoteService: BlindVoteService,
+    private val mbtiService: MbtiService,
 ) {
     suspend fun createBlindVote(request: ServerRequest): ServerResponse {
         return withContext(Dispatchers.Default) {
             val createRequest = request.awaitBody<VoteCreateRequest>()
 
-            commandService.createBlindVote(createRequest)
+            blindVoteService.createBlindVote(createRequest)
                 .let { ok().bodyValueAndAwait(it) }
         }
     }
@@ -33,7 +37,25 @@ class CommandHandler(
         return withContext(Dispatchers.Default) {
             val interactRequest = request.awaitBody<VoteInteractRequest>()
 
-            commandService.interactBlindVote(interactRequest)
+            blindVoteService.interactBlindVote(interactRequest)
+                .let { ok().bodyValueAndAwait(it) }
+        }
+    }
+
+    suspend fun testMbti(request: ServerRequest): ServerResponse {
+        return withContext(Dispatchers.Default) {
+            val testRequest = request.awaitBody<MbtiTestRequest>()
+
+            mbtiService.testMbti(testRequest)
+                .let { ok().bodyValueAndAwait(it) }
+        }
+    }
+
+    suspend fun interactMbti(request: ServerRequest): ServerResponse {
+        return withContext(Dispatchers.Default) {
+            val interactRequest = request.awaitBody<MbtiInteractRequest>()
+
+            mbtiService.interactMbti(interactRequest)
                 .let { ok().bodyValueAndAwait(it) }
         }
     }

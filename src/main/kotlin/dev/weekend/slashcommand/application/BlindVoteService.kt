@@ -10,9 +10,14 @@ import dev.weekend.slashcommand.domain.enums.VoteInteractionType
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType.*
 import dev.weekend.slashcommand.domain.model.DoorayDialog
 import dev.weekend.slashcommand.domain.model.DoorayElement
-import dev.weekend.slashcommand.domain.repository.*
+import dev.weekend.slashcommand.domain.repository.BlindVoteEmojiRepository
+import dev.weekend.slashcommand.domain.repository.BlindVoteItemRepository
+import dev.weekend.slashcommand.domain.repository.BlindVoteMemberRepository
+import dev.weekend.slashcommand.domain.repository.BlindVoteRepository
 import dev.weekend.slashcommand.infrastructure.client.DoorayClient
-import dev.weekend.slashcommand.presentation.model.*
+import dev.weekend.slashcommand.presentation.model.CommandResponse
+import dev.weekend.slashcommand.presentation.model.VoteCreateRequest
+import dev.weekend.slashcommand.presentation.model.VoteInteractRequest
 import kotlinx.coroutines.runBlocking
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException
 import org.springframework.data.repository.findByIdOrNull
@@ -24,7 +29,7 @@ import org.springframework.transaction.support.TransactionTemplate
  */
 
 @Service
-class CommandService(
+class BlindVoteService(
     private val blindVoteRepository: BlindVoteRepository,
     private val blindVoteItemRepository: BlindVoteItemRepository,
     private val blindVoteMemberRepository: BlindVoteMemberRepository,
@@ -139,8 +144,7 @@ class CommandService(
                 vote = vote,
                 voteItemName = voteItem,
                 voteItemLink = voteLink.takeIf { !it.isNullOrEmpty() },
-            ).let { blindVoteItemRepository.save(it) }
-                .also { voteItems.add(it) }
+            ).let { blindVoteItemRepository.save(it) }.also { voteItems.add(it) }
             vote.updateSelectableItemCnt(voteItems.size)
 
             runBlocking {
@@ -303,8 +307,7 @@ class CommandService(
                         vote = vote,
                         voteItem = targetItem,
                         userId = userId,
-                    ).let { blindVoteMemberRepository.save(it) }
-                        .also { voteMembers.add(it) }
+                    ).let { blindVoteMemberRepository.save(it) }.also { voteMembers.add(it) }
                 } else if (vote.selectableItemCnt == 1) { // 투표할 수 있는 개수가 1개이고, 나의 투표수도 1인 경우
                     val previousVoteMember = voteMembers.first { it.userId == userId }
                     val previousVoteItem = voteItems.first { it.voteItemNo == previousVoteMember.voteItem.voteItemNo }
@@ -317,8 +320,7 @@ class CommandService(
                         vote = vote,
                         voteItem = targetItem,
                         userId = userId,
-                    ).let { blindVoteMemberRepository.save(it) }
-                        .also { voteMembers.add(it) }
+                    ).let { blindVoteMemberRepository.save(it) }.also { voteMembers.add(it) }
                 }
             } else { // 해당 항목에 이미 투표한 경우
                 targetItem.decreaseCnt()
@@ -394,7 +396,7 @@ class CommandService(
                                 value = linkValue,
                                 placeholder = "클릭 시 이동할 링크를 입력해 주세요.",
                                 optional = true,
-                            )
+                            ),
                         ),
                     ),
                 ),
