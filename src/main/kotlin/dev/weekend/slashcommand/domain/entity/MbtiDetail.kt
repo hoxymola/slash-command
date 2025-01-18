@@ -23,4 +23,4 @@ data class MbtiDetail(
     val url: String,
 
     val alias: String,
-) : BaseTimeEntity()
+)

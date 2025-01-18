@@ -1,6 +1,7 @@
 package dev.weekend.slashcommand.presentation.model
 
 import dev.weekend.slashcommand.domain.enums.MbtiInteractionType
+import dev.weekend.slashcommand.domain.model.DoorayTenant
 import dev.weekend.slashcommand.domain.model.DoorayUser
 
 /**
@@ -11,7 +12,7 @@ data class MbtiInteractRequest(
     val user: DoorayUser,
     val actionName: MbtiInteractionType,
     val actionValue: String,
-    val responseUrl: String,
+    val tenant: DoorayTenant,
 ) {
     val userId = user.id.toLong()
     val testNo = actionValue.substringBefore(':').toLongOrNull() ?: 0

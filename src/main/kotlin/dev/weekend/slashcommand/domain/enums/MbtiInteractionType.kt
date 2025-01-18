@@ -13,6 +13,7 @@ enum class MbtiInteractionType : InteractionType {
     NEXT_QUESTION,
     PREV_QUESTION,
     GET_RESULT,
+    SHARE_RESULT,
     GET_STATISTICS,
     SHARE_STATISTICS,
     ;

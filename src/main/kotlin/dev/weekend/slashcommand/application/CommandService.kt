@@ -82,10 +82,6 @@ class CommandService(
         val mbtiResult = mbtiResultRepository.findByUserId(request.userId)
         val mbtiDetail = mbtiResult?.let { mbtiDetailRepository.findByIdOrNull(it.mbti) }
 
-        MbtiTestMapping.createBy(
-            userId = request.userId,
-        ).also { mbtiTestMappingRepository.save(it) }
-
         return CommandResponse.createFormBy(
             mbtiResult = mbtiResult,
             mbtiDetail = mbtiDetail,
@@ -104,6 +100,7 @@ class CommandService(
             PREV_QUESTION -> request.prevQuestion()
             NEXT_QUESTION -> request.nextQuestion()
             GET_RESULT -> request.getResult()
+            SHARE_RESULT -> request.shareResult()
             GET_STATISTICS -> request.getStatistics()
             SHARE_STATISTICS -> request.shareStatistics()
         }
@@ -495,8 +492,23 @@ class CommandService(
             CommandResponse.createResultBy(
                 mbtiResult = result,
                 mbtiDetail = mbtiDetail,
+                responseType = EPHEMERAL,
             )
         } ?: CommandResponse.createResponse()
+    }
+
+    private fun MbtiInteractRequest.shareResult(): CommandResponse {
+        val result = mbtiResultRepository.findByUserId(userId) ?: throw NotFoundException()
+        val detail = mbtiDetailRepository.findByIdOrNull(result.mbti) ?: throw NotFoundException()
+
+        return CommandResponse.createResultBy(
+            mbtiResult = result,
+            mbtiDetail = detail,
+            responseType = IN_CHANNEL,
+            deleteOriginal = true,
+            tenantId = tenant.id,
+            userId = user.id,
+        )
     }
 
     private fun MbtiInteractRequest.getStatistics(): CommandResponse {
