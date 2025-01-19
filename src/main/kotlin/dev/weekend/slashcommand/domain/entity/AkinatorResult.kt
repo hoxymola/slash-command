@@ -24,8 +24,6 @@ data class AkinatorResult(
 
     var description: String? = null,
 
-    var pseudonym: String? = null,
-
     var image: String? = null,
 ) : BaseTimeEntity() {
     fun updateResult(
@@ -33,7 +31,6 @@ data class AkinatorResult(
     ) {
         name = akinator.name
         description = akinator.description
-        pseudonym = akinator.pseudonym
         image = akinator.image.toString()
     }
 

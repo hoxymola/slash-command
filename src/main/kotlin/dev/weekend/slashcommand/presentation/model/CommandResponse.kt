@@ -513,7 +513,6 @@ data class CommandResponse(
                 DoorayAttachment(
                     title = guess.name,
                     authorName = guess.description,
-                    text = guess.pseudonym,
                     imageUrl = guess.image.toString(),
                     actions = listOf(
                         DoorayAction.createButton(
@@ -541,7 +540,6 @@ data class CommandResponse(
                 DoorayAttachment(
                     title = akinatorResult.name,
                     authorName = akinatorResult.description,
-                    text = akinatorResult.pseudonym,
                     imageUrl = akinatorResult.image.toString(),
                     actions = listOf(
                         DoorayAction.createButton(
