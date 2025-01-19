@@ -93,22 +93,18 @@ class AkinatorService(
     }
 
     private fun AkinatorInteractRequest.confirmGuess(): CommandResponse {
-        return transactionTemplate.execute {
-            val akinatorResult = akinatorResultRepository.findTopByUserIdOrderByAkinatorNoDesc(user.id)
-                ?: throw NotFoundException()
-            val akinator = akinatorCache.getAkinator(user.id).currentQuery as GuessImpl
+        val akinator = akinatorCache.getAkinator(user.id).currentQuery as GuessImpl
+        val akinatorResult = transactionTemplate.execute {
+            akinatorResultRepository.findTopByUserIdOrderByAkinatorNoDesc(user.id)
+                ?.apply { updateResult(akinator) }
+        } ?: throw NotFoundException()
 
-            akinatorResult.apply {
-                updateResult(akinator)
-            }
-            // akinator.confirm() 왜 에러나는지 모르겠음
-            akinatorCache.deleteAkinator(user.id)
+        akinatorCache.deleteAkinator(user.id)
 
-            CommandResponse.createResultBy(
-                akinatorResult = akinatorResult,
-                responseType = EPHEMERAL,
-            )
-        } ?: CommandResponse.createResponse()
+        return CommandResponse.createResultBy(
+            akinatorResult = akinatorResult,
+            responseType = EPHEMERAL,
+        )
     }
 
     private fun AkinatorInteractRequest.rejectGuess(): CommandResponse {
