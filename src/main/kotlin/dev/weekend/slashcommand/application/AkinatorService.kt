@@ -126,6 +126,7 @@ class AkinatorService(
         return CommandResponse.createResultBy(
             akinatorResult = akinatorResult,
             responseType = IN_CHANNEL,
+            deleteOriginal = true,
         )
     }
 }
