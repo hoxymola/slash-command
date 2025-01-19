@@ -532,8 +532,13 @@ data class CommandResponse(
             akinatorResult: AkinatorResult,
             responseType: DoorayResponseType,
             deleteOriginal: Boolean? = null,
+            tenantId: String? = null,
+            userId: String? = null,
         ) = CommandResponse(
-            text = "훌륭합니다, 또 맞추었습니다!",
+            text = when (responseType) {
+                IN_CHANNEL -> """(dooray://${tenantId}/members/${userId} "member") 님께서 생각을 읽히셨습니다!"""
+                EPHEMERAL -> "당신의 생각을 읽었습니다!"
+            },
             responseType = responseType.value,
             deleteOriginal = deleteOriginal,
             attachments = listOf(
