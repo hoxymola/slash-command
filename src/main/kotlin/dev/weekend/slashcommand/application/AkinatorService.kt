@@ -4,7 +4,6 @@ import dev.weekend.slashcommand.domain.entity.AkinatorResult
 import dev.weekend.slashcommand.domain.enums.AkinatorInteractionType.*
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.EPHEMERAL
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.IN_CHANNEL
-import dev.weekend.slashcommand.domain.extension.toJson
 import dev.weekend.slashcommand.domain.repository.AkinatorResultRepository
 import dev.weekend.slashcommand.infrastructure.cache.AkinatorCache
 import dev.weekend.slashcommand.presentation.model.AkinatorInteractRequest
@@ -102,7 +101,8 @@ class AkinatorService(
             akinatorResult.apply {
                 updateResult(akinator)
             }
-//            akinator.confirm()
+            // akinator.confirm() 왜 에러나는지 모르겠음
+            akinatorCache.deleteAkinator(user.id)
 
             CommandResponse.createResultBy(
                 akinatorResult = akinatorResult,
