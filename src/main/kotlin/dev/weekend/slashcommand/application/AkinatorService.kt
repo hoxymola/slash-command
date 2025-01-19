@@ -123,6 +123,8 @@ class AkinatorService(
             akinatorResult = akinatorResult,
             responseType = IN_CHANNEL,
             deleteOriginal = true,
+            tenantId = tenant.id,
+            userId = user.id,
         )
     }
 }
