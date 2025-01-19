@@ -20,6 +20,8 @@ class CommandRouter(
             POST("/blind-vote/interact", commandHandler::interactBlindVote)
             POST("/mbti", commandHandler::testMbti)
             POST("/mbti/interact", commandHandler::interactMbti)
+            POST("/akinator", commandHandler::createAkinator)
+            POST("/akinator/interact", commandHandler::interactAkinator)
         }
     }
 }
