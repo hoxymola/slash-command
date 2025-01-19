@@ -27,6 +27,8 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	implementation("com.mysql:mysql-connector-j:8.2.0")
+	implementation("org.eu.zajc:akiwrapper:2.0.0")
+	implementation("com.google.guava:guava:32.1.2-jre")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
