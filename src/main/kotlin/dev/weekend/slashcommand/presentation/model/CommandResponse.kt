@@ -1,9 +1,13 @@
 package dev.weekend.slashcommand.presentation.model
 
+import dev.weekend.slashcommand.domain.constant.AkinatorConstant.DEFAULT_AKINATOR_IMAGE
+import dev.weekend.slashcommand.domain.constant.AkinatorConstant.FIRST_STEP
 import dev.weekend.slashcommand.domain.constant.MbtiConstant.DEFAULT_IMAGE
 import dev.weekend.slashcommand.domain.constant.MbtiConstant.FIRST_QUESTION_SEQ
 import dev.weekend.slashcommand.domain.constant.MbtiConstant.LAST_QUESTION_SEQ
 import dev.weekend.slashcommand.domain.entity.*
+import dev.weekend.slashcommand.domain.enums.AkinatorAnswerType
+import dev.weekend.slashcommand.domain.enums.AkinatorInteractionType.*
 import dev.weekend.slashcommand.domain.enums.DoorayActionType.SELECT
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.DEFAULT
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.PRIMARY
@@ -19,6 +23,8 @@ import dev.weekend.slashcommand.domain.extension.toPercent
 import dev.weekend.slashcommand.domain.model.DoorayAction
 import dev.weekend.slashcommand.domain.model.DoorayAttachment
 import dev.weekend.slashcommand.domain.model.DoorayOption
+import org.eu.zajc.akiwrapper.core.entities.impl.GuessImpl
+import org.eu.zajc.akiwrapper.core.entities.impl.QuestionImpl
 
 /**
  * @author Jaeguk Cho
@@ -42,6 +48,18 @@ data class CommandResponse(
 
         fun createCancelTest() = CommandResponse(
             text = "검사를 취소했습니다. 🥺",
+            responseType = EPHEMERAL.value,
+            deleteOriginal = true,
+        )
+
+        fun createCancelAkinator() = CommandResponse(
+            text = "아키네이터를 취소했습니다. 🥺",
+            responseType = EPHEMERAL.value,
+            deleteOriginal = true,
+        )
+
+        fun createWinAkinator() = CommandResponse(
+            text = "아키네이터의 질문이 바닥났습니다. 🥺",
             responseType = EPHEMERAL.value,
             deleteOriginal = true,
         )
@@ -420,6 +438,129 @@ data class CommandResponse(
                 ),
             )
         }
+
+        fun createFormBy(
+            akinatorExists: Boolean,
+        ) = CommandResponse(
+            text = when (akinatorExists) {
+                true -> "이어서 진행하시겠습니까?"
+                false -> "실제 또는 가상의 인물을 생각해 보세요."
+            },
+            responseType = EPHEMERAL.value,
+            attachments = listOf(
+                DoorayAttachment(
+                    imageUrl = DEFAULT_AKINATOR_IMAGE,
+                ),
+                DoorayAttachment(
+                    actions = when (akinatorExists) {
+                        true -> listOf(
+                            DoorayAction.createButton(
+                                name = CONTINUE_AKINATOR,
+                                text = "이어서 시작",
+                                style = DEFAULT,
+                            ),
+                            DoorayAction.createButton(
+                                name = START_AKINATOR,
+                                text = "새로 시작",
+                                style = DEFAULT,
+                            ),
+                        )
+
+                        false -> listOf(
+                            DoorayAction.createButton(
+                                name = START_AKINATOR,
+                                text = "시작",
+                                style = PRIMARY,
+                            ),
+                        )
+                    } + listOf(
+                        DoorayAction.createButton(
+                            name = CANCEL_AKINATOR,
+                            text = "취소",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        fun createQuestionBy(
+            question: QuestionImpl,
+        ) = CommandResponse(
+            text = "Q${question.step + 1}. ${question.text}",
+            attachments = listOfNotNull(
+                DoorayAttachment(
+                    imageUrl = question.akitude.toString(),
+                    actions = AkinatorAnswerType.entries.map {
+                        DoorayAction.createButton(
+                            name = ANSWER_QUESTION,
+                            text = it.value,
+                            value = it.name,
+                        )
+                    },
+                ),
+                DoorayAttachment(
+                    actions = listOf(
+                        DoorayAction.createButton(
+                            name = UNDO_ANSWER,
+                            text = "이전 질문",
+                        ),
+                    ),
+                ).takeIf { question.step != FIRST_STEP },
+            ),
+            responseType = EPHEMERAL.value,
+        )
+
+        fun createGuessBy(
+            guess: GuessImpl,
+        ) = CommandResponse(
+            text = "제 생각은..",
+            responseType = EPHEMERAL.value,
+            attachments = listOf(
+                DoorayAttachment(
+                    title = guess.name,
+                    authorName = guess.description,
+                    imageUrl = guess.image.toString(),
+                    actions = listOf(
+                        DoorayAction.createButton(
+                            name = CONFIRM_GUESS,
+                            text = "맞아요",
+                        ),
+                        DoorayAction.createButton(
+                            name = REJECT_GUESS,
+                            text = "아니에요",
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        fun createResultBy(
+            akinatorResult: AkinatorResult,
+            responseType: DoorayResponseType,
+            deleteOriginal: Boolean? = null,
+            tenantId: String? = null,
+            userId: String? = null,
+        ) = CommandResponse(
+            text = when (responseType) {
+                IN_CHANNEL -> """(dooray://${tenantId}/members/${userId} "member") 님께서 생각을 읽히셨습니다!"""
+                EPHEMERAL -> "당신의 생각을 읽었습니다!"
+            },
+            responseType = responseType.value,
+            deleteOriginal = deleteOriginal,
+            attachments = listOf(
+                DoorayAttachment(
+                    title = akinatorResult.name,
+                    authorName = akinatorResult.description,
+                    imageUrl = akinatorResult.image.toString(),
+                    actions = listOf(
+                        DoorayAction.createButton(
+                            name = SHARE_GUESS,
+                            text = "공유하기",
+                        ),
+                    ).takeIf { responseType == EPHEMERAL },
+                ),
+            ),
+        )
 
         fun createResponse(
             text: String = "",

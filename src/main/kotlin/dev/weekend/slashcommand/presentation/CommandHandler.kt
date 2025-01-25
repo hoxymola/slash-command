@@ -1,11 +1,9 @@
 package dev.weekend.slashcommand.presentation
 
+import dev.weekend.slashcommand.application.AkinatorService
 import dev.weekend.slashcommand.application.BlindVoteService
 import dev.weekend.slashcommand.application.MbtiService
-import dev.weekend.slashcommand.presentation.model.MbtiInteractRequest
-import dev.weekend.slashcommand.presentation.model.MbtiTestRequest
-import dev.weekend.slashcommand.presentation.model.VoteCreateRequest
-import dev.weekend.slashcommand.presentation.model.VoteInteractRequest
+import dev.weekend.slashcommand.presentation.model.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
@@ -23,6 +21,7 @@ import org.springframework.web.reactive.function.server.bodyValueAndAwait
 class CommandHandler(
     private val blindVoteService: BlindVoteService,
     private val mbtiService: MbtiService,
+    private val akinatorService: AkinatorService,
 ) {
     suspend fun createBlindVote(request: ServerRequest): ServerResponse {
         return withContext(Dispatchers.Default) {
@@ -56,6 +55,24 @@ class CommandHandler(
             val interactRequest = request.awaitBody<MbtiInteractRequest>()
 
             mbtiService.interactMbti(interactRequest)
+                .let { ok().bodyValueAndAwait(it) }
+        }
+    }
+
+    suspend fun createAkinator(request: ServerRequest): ServerResponse {
+        return withContext(Dispatchers.Default) {
+            val startRequest = request.awaitBody<AkinatorStartRequest>()
+
+            akinatorService.startAkinator(startRequest)
+                .let { ok().bodyValueAndAwait(it) }
+        }
+    }
+
+    suspend fun interactAkinator(request: ServerRequest): ServerResponse {
+        return withContext(Dispatchers.Default) {
+            val interactRequest = request.awaitBody<AkinatorInteractRequest>()
+
+            akinatorService.interactAkinator(interactRequest)
                 .let { ok().bodyValueAndAwait(it) }
         }
     }
