@@ -58,6 +58,12 @@ data class CommandResponse(
             deleteOriginal = true,
         )
 
+        fun createWinAkinator() = CommandResponse(
+            text = "아키네이터의 질문이 바닥났습니다. 🥺",
+            responseType = EPHEMERAL.value,
+            deleteOriginal = true,
+        )
+
         fun createFormBy(
             vote: BlindVote,
             voteItems: List<BlindVoteItem> = emptyList(),

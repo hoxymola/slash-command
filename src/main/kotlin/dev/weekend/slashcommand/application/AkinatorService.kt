@@ -67,7 +67,7 @@ class AkinatorService(
         return when (val query = akinator.currentQuery) {
             is QuestionImpl -> CommandResponse.createQuestionBy(query)
             is GuessImpl -> CommandResponse.createGuessBy(query)
-            null -> CommandResponse.createResponse("아키네이터의 질문이 바닥났습니다. 🥺")
+            null -> CommandResponse.createWinAkinator()
             else -> throw InternalError()
         }
     }
