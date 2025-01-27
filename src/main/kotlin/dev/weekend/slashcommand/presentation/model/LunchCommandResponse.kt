@@ -85,7 +85,7 @@ data class LunchCommandResponse(
                         ),
                         DoorayAction.createButton(
                             name = LunchInteractionType.RECOMMEND_AGAIN,
-                            text = "다시 뽑기 🤨",
+                            text = "${if(value.isNotBlank()) item.type.label.padEnd(1) else ""}다시 뽑기 🤨",
                             value = value,
                         ),
                         DoorayAction.createButton(
@@ -128,8 +128,7 @@ data class LunchCommandResponse(
         fun createCancel(responseType: String) = LunchCommandResponse(
             text = "다음에 다시 만나요 😵‍💫",
             responseType = responseType,
-            replaceOriginal = true,
-            attachments = listOf(),
+            deleteOriginal = true,
         )
     }
 }

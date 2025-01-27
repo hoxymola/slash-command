@@ -56,7 +56,7 @@ class LunchService(
     }
 
     private fun LunchInteractRequest.getRecommendation(): LunchCommandResponse {
-        val item = if (actionValue.isNotEmpty()) {
+        val item = if (actionValue.isNotBlank()) {
             lunchItemRepository.getRandomItemByType(actionValue)
         } else lunchItemRepository.getRandomItem()
 
