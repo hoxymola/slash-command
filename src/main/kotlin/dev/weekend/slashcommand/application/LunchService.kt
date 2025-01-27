@@ -1,10 +1,14 @@
 package dev.weekend.slashcommand.application
 
+import dev.weekend.slashcommand.domain.entity.LunchItem
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType
 import dev.weekend.slashcommand.domain.model.DoorayAttachment
+import dev.weekend.slashcommand.domain.repository.LunchItemRepository
 import dev.weekend.slashcommand.presentation.model.CommandResponse
+import dev.weekend.slashcommand.presentation.model.LunchCreateRequest
 import dev.weekend.slashcommand.presentation.model.LunchStartRequest
 import org.springframework.stereotype.Service
+import org.springframework.transaction.support.TransactionTemplate
 
 /**
  * @author Yoohwa Cho
@@ -12,7 +16,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class LunchService(
-
+    private val lunchItemRepository: LunchItemRepository,
+    private val transactionTemplate: TransactionTemplate,
 ) {
     fun startLunch(
         request: LunchStartRequest,
@@ -31,5 +36,21 @@ class LunchService(
                 )
             )
         )
+    }
+
+    fun createLunchItems(
+        request: LunchCreateRequest,
+    ) {
+        request.lists.map {
+            LunchItem.createBy(
+                name = it.name,
+                link = it.link,
+                type = it.type,
+            )
+        }.let { items ->
+            transactionTemplate.execute {
+                lunchItemRepository.saveAll(items)
+            }
+        }
     }
 }

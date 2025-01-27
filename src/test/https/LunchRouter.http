@@ -1,0 +1,13 @@
+### POST 점메추 식당 추가 - 리스트
+POST http://localhost:5001/slash-command/lunch/new
+content-type: application/json
+
+{
+  "lists": [
+    {
+      "name": "타코디스코",
+      "link": "https://map.naver.com/p/entry/place/1192436184?c=15.00,0,0,0,dh&placePath=/menu",
+      "type": "ETC"
+    }
+  ]
+}

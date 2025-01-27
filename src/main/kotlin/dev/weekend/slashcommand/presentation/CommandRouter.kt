@@ -23,6 +23,7 @@ class CommandRouter(
             POST("/akinator", commandHandler::createAkinator)
             POST("/akinator/interact", commandHandler::interactAkinator)
             POST("/lunch", commandHandler::recommendLunch)
+            POST("/lunch/new", commandHandler::createLunchItem)
         }
     }
 }
