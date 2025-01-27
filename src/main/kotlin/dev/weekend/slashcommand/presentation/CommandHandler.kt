@@ -81,7 +81,17 @@ class CommandHandler(
         return withContext(Dispatchers.Default) {
             val recommendRequest = request.awaitBody<LunchStartRequest>()
 
-            lunchService.startLunch(recommendRequest)
+            lunchService.start(recommendRequest)
+                .let { ok().bodyValueAndAwait(it) }
+        }
+    }
+
+    suspend fun interactLunch(request: ServerRequest): ServerResponse {
+        return withContext(Dispatchers.Default) {
+            val originalRequest = request.toString()
+            val interactRequest = request.awaitBody<LunchInteractRequest>()
+
+            lunchService.interact(interactRequest, originalRequest)
                 .let { ok().bodyValueAndAwait(it) }
         }
     }
@@ -90,7 +100,7 @@ class CommandHandler(
         return withContext(Dispatchers.Default) {
             val createRequest = request.awaitBody<LunchCreateRequest>()
 
-            lunchService.createLunchItems(createRequest)
+            lunchService.createItems(createRequest)
                 .let { noContent().buildAndAwait() }
         }
     }
