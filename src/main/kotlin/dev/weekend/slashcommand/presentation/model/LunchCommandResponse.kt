@@ -85,7 +85,7 @@ data class LunchCommandResponse(
                         ),
                         DoorayAction.createButton(
                             name = LunchInteractionType.RECOMMEND_AGAIN,
-                            text = "${if(value.isNotBlank()) item.type.label.padEnd(1) else ""}다시 뽑기 🤨",
+                            text = "${if(value.isNotBlank()) item.type.label+" " else ""}다시 뽑기 🤨",
                             value = value,
                         ),
                         DoorayAction.createButton(
