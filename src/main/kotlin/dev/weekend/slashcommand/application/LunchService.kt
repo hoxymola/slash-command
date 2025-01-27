@@ -73,7 +73,7 @@ class LunchService(
     }
 
     private fun LunchInteractRequest.start(): LunchCommandResponse {
-        val responseType = if (actionValue == DoorayResponseType.IN_CHANNEL.name) {
+        val responseType = if (actionValue == DoorayResponseType.IN_CHANNEL.value) {
             actionValue
         } else originalMessage.responseType
         val req = this.toString()

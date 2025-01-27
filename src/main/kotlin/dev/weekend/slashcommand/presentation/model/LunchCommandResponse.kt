@@ -35,7 +35,7 @@ data class LunchCommandResponse(
                         DoorayAction.createButton(
                             name = LunchInteractionType.START,
                             text = "같이 고를래요 👥",
-                            value = IN_CHANNEL.name,
+                            value = IN_CHANNEL.value,
                         ),
                     )
                 )
