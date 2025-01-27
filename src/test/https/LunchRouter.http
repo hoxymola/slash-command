@@ -28,3 +28,28 @@ content-type: application/json
     "domain": "domain"
   }
 }
+
+### POST 점메추 처음 시작하기
+POST http://localhost:5001/slash-command/lunch
+content-type: application/json
+
+{
+  "userId": "13838"
+}
+
+### POST 점메추 추천 시작하기
+POST http://localhost:5001/slash-command/lunch/interact
+content-type: application/json
+
+{
+  "user": {
+    "id": "13838",
+    "email": "testEmail"
+  },
+  "actionName": "START",
+  "actionValue": "{\"responseType\":\"inChannel\",\"itemNo\":\"\",\"itemType\":\"\"}",
+  "tenant": {
+    "id": "id",
+    "domain": "domain"
+  }
+}
