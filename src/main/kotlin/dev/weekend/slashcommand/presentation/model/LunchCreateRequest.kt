@@ -9,5 +9,3 @@ import dev.weekend.slashcommand.domain.enums.LunchItemType
 data class LunchCreateRequest(
     val lists: List<LunchItemCreateCommand>,
 )
-
-
