@@ -90,7 +90,6 @@ class CommandHandler(
     suspend fun interactLunch(request: ServerRequest): ServerResponse {
         return withContext(Dispatchers.Default) {
             val interactRequest = request.awaitBody<LunchInteractRequest>()
-            println(">>>>INTERACT REQUEST: ${interactRequest.toJson()}")
 
             lunchService.interact(interactRequest)
                 .let { ok().bodyValueAndAwait(it) }
