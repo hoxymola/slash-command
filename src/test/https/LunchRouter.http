@@ -11,3 +11,20 @@ content-type: application/json
     }
   ]
 }
+
+### POST 점메추 카테고리에 따른 추천 받기
+POST http://localhost:5001/slash-command/lunch/interact
+content-type: application/json
+
+{
+  "user": {
+    "id": "13838",
+    "email": "testEmail"
+  },
+  "actionName": "GET_RECOMMENDATION",
+  "actionValue": "KOREAN",
+  "tenant": {
+    "id": "id",
+    "domain": "domain"
+  }
+}

@@ -77,7 +77,7 @@ class CommandHandler(
         }
     }
 
-    suspend fun recommendLunch(request: ServerRequest): ServerResponse {
+    suspend fun startRecommendLunch(request: ServerRequest): ServerResponse {
         return withContext(Dispatchers.Default) {
             val recommendRequest = request.awaitBody<LunchStartRequest>()
 
@@ -88,10 +88,9 @@ class CommandHandler(
 
     suspend fun interactLunch(request: ServerRequest): ServerResponse {
         return withContext(Dispatchers.Default) {
-            val originalRequest = request.toString()
             val interactRequest = request.awaitBody<LunchInteractRequest>()
 
-            lunchService.interact(interactRequest, originalRequest)
+            lunchService.interact(interactRequest)
                 .let { ok().bodyValueAndAwait(it) }
         }
     }

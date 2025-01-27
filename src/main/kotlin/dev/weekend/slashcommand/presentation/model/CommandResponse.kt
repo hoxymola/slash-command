@@ -6,14 +6,16 @@ import dev.weekend.slashcommand.domain.constant.MbtiConstant.DEFAULT_IMAGE
 import dev.weekend.slashcommand.domain.constant.MbtiConstant.FIRST_QUESTION_SEQ
 import dev.weekend.slashcommand.domain.constant.MbtiConstant.LAST_QUESTION_SEQ
 import dev.weekend.slashcommand.domain.entity.*
-import dev.weekend.slashcommand.domain.enums.*
+import dev.weekend.slashcommand.domain.enums.AkinatorAnswerType
 import dev.weekend.slashcommand.domain.enums.AkinatorInteractionType.*
 import dev.weekend.slashcommand.domain.enums.DoorayActionType.SELECT
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.DEFAULT
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.PRIMARY
+import dev.weekend.slashcommand.domain.enums.DoorayResponseType
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.EPHEMERAL
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.IN_CHANNEL
 import dev.weekend.slashcommand.domain.enums.MbtiInteractionType.*
+import dev.weekend.slashcommand.domain.enums.VoteInteractionType
 import dev.weekend.slashcommand.domain.enums.VoteInteractionType.*
 import dev.weekend.slashcommand.domain.extension.toGraphBar
 import dev.weekend.slashcommand.domain.extension.toMonospacedFont
@@ -571,60 +573,6 @@ data class CommandResponse(
             replaceOriginal = replaceOriginal,
             deleteOriginal = deleteOriginal,
             channelId = channelId,
-        )
-
-        fun createLunchFormBy() = CommandResponse(
-            text = "오늘의 점심 메뉴는? 😮",
-            responseType = EPHEMERAL.value,
-            attachments = listOf(
-                DoorayAttachment(
-                    actions = listOfNotNull(
-                        DoorayAction.createButton(
-                            name = LunchInteractionType.GET_RECOMMENDATION,
-                            text = "랜덤으로 추천받기",
-                            style = PRIMARY,
-                        ),
-                        DoorayAction.createButton(
-                            name = LunchInteractionType.START_DETAIL_RECOMMEND,
-                            text = "카테고리 선택하기",
-                        )
-                    )
-                )
-            )
-        )
-
-        fun createLunchResultBy(item: LunchItem, og: String) = CommandResponse(
-                text = "오늘 점심으로 `${item.name}`(${item.type.label}) 어떠세요?",
-                responseType = IN_CHANNEL.value,
-                deleteOriginal = true,
-                attachments = listOf(
-                    DoorayAttachment(
-                        title = "${item.name} - 메뉴 보러가기",
-                        titleLink = item.link,
-                    ), DoorayAttachment(
-                        title = "요청값",
-                        text = og,
-                    )
-            )
-        )
-
-        fun createLunchDetailForm(og: String) = CommandResponse(
-            text = "",
-            responseType = EPHEMERAL.value,
-            attachments = listOf(
-                DoorayAttachment(
-                    actions = LunchItemType.entries.map { lunchType ->
-                        DoorayAction.createButton(
-                            name = LunchInteractionType.GET_RECOMMENDATION,
-                            text = lunchType.label,
-                        )
-                    }
-                ),
-                DoorayAttachment(
-                    title = "요청값",
-                    text = og,
-                )
-            ),
         )
     }
 }

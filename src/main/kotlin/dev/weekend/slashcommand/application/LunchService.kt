@@ -1,12 +1,14 @@
 package dev.weekend.slashcommand.application
 
 import dev.weekend.slashcommand.domain.entity.LunchItem
+import dev.weekend.slashcommand.domain.enums.DoorayResponseType
 import dev.weekend.slashcommand.domain.enums.LunchInteractionType
 import dev.weekend.slashcommand.domain.repository.LunchItemRepository
-import dev.weekend.slashcommand.presentation.model.CommandResponse
+import dev.weekend.slashcommand.presentation.model.LunchCommandResponse
 import dev.weekend.slashcommand.presentation.model.LunchCreateRequest
 import dev.weekend.slashcommand.presentation.model.LunchInteractRequest
 import dev.weekend.slashcommand.presentation.model.LunchStartRequest
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
 
@@ -21,22 +23,19 @@ class LunchService(
 ) {
     fun start(
         request: LunchStartRequest,
-    ): CommandResponse {
-
-        return CommandResponse.createLunchFormBy()
+    ): LunchCommandResponse {
+        return LunchCommandResponse.createLunchStartFormBy()
     }
 
-    fun interact(request: LunchInteractRequest, og: String): CommandResponse {
-        return when(request.actionName) {
-            LunchInteractionType.GET_RECOMMENDATION -> request.getRecommendation(og) //추천 받기 - 전체 랜덤
-            LunchInteractionType.START_DETAIL_RECOMMEND -> request.startDetailRecommendation(og) //타입에 따라 추천 받기
-            else -> CommandResponse.createResponse(
-                text = "oops,,, 아직 제공하지 않는 기능입니다."
-            )
-            //TODO interaction 추가하기
-//            LunchInteractionType.RECOMMEND_AGAIN, //추천 다시 받기
-//            LunchInteractionType.CONFIRM_RECOMMEND, //추천 확정하기
-//            LunchInteractionType.CANCEL_RECOMMEND, //추천 취소하기
+    fun interact(request: LunchInteractRequest): LunchCommandResponse {
+        return when (request.actionName) {
+            LunchInteractionType.START,
+            LunchInteractionType.RESTART -> request.start() //시작하기
+            LunchInteractionType.GET_RECOMMENDATION,
+            LunchInteractionType.RECOMMEND_AGAIN -> request.getRecommendation() //추천 받기
+            LunchInteractionType.START_DETAIL_RECOMMEND -> request.startDetailRecommendation() //타입에 따라 추천 받기
+            LunchInteractionType.CONFIRM_RECOMMEND -> request.confirm() //추천 확정하기
+            else -> request.cancel()
         }
     }
 
@@ -56,13 +55,32 @@ class LunchService(
         }
     }
 
-    private fun LunchInteractRequest.getRecommendation(og: String): CommandResponse {
-        val item = lunchItemRepository.getRandomItem()
+    private fun LunchInteractRequest.getRecommendation(): LunchCommandResponse {
+        val item = if (actionValue.isNotEmpty()) {
+            lunchItemRepository.getRandomItemByType(actionValue)
+        } else lunchItemRepository.getRandomItem()
 
-        return CommandResponse.createLunchResultBy(item, og)
+        return LunchCommandResponse.createLunchResultBy(item, actionValue, originalMessage.responseType)
     }
 
-    private fun LunchInteractRequest.startDetailRecommendation(og: String): CommandResponse {
-        return CommandResponse.createLunchDetailForm(og)
+    private fun LunchInteractRequest.startDetailRecommendation(): LunchCommandResponse {
+        return LunchCommandResponse.createLunchDetailForm(originalMessage.responseType)
+    }
+
+    private fun LunchInteractRequest.confirm(): LunchCommandResponse {
+        val item = lunchItemRepository.findByIdOrNull(actionValue.toLong()) ?: throw InternalError()
+        return LunchCommandResponse.createLunchConfirmResult(item)
+    }
+
+    private fun LunchInteractRequest.start(): LunchCommandResponse {
+        val responseType = if (actionValue == DoorayResponseType.IN_CHANNEL.name) {
+            actionValue
+        } else originalMessage.responseType
+        val req = this.toString()
+        return LunchCommandResponse.createLunchFormBy(responseType, req)
+    }
+
+    private fun LunchInteractRequest.cancel(): LunchCommandResponse {
+        return LunchCommandResponse.createCancel(originalMessage.responseType)
     }
 }
