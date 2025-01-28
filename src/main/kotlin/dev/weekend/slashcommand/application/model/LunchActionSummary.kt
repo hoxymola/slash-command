@@ -10,7 +10,7 @@ data class LunchActionSummary(
     val responseType: String = "",
 ) {
     var itemNo: String = ""
-    var itemType: String = ""
+    var itemType: String? = null
 
     fun changeItemNo(itemNo: Long): LunchActionSummary {
         return this.apply {
@@ -35,10 +35,6 @@ data class LunchActionSummary(
 
     fun convertItemNo(): Long {
         return itemNo.toLongOrNull() ?: 0L
-    }
-
-    fun convertItemType(): LunchItemType {
-        return LunchItemType.valueOf(itemType)
     }
 
     companion object {
