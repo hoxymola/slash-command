@@ -11,5 +11,6 @@ enum class LunchInteractionType : InteractionType {
     CONFIRM_RECOMMEND, //추천 확정하기
     RESTART, //처음으로 가기
     CANCEL, //취소하기
+    HELP, //도움말
     ;
 }

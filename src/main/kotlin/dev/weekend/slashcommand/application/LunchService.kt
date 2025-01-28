@@ -34,6 +34,7 @@ class LunchService(
             LunchInteractionType.RECOMMEND_AGAIN -> request.getRecommendation() //추천 받기
             LunchInteractionType.START_DETAIL_RECOMMEND -> request.startDetailRecommendation() //타입에 따라 추천 받기
             LunchInteractionType.CONFIRM_RECOMMEND -> request.confirm() //추천 확정하기
+            LunchInteractionType.HELP -> request.help()
             else -> request.cancel()
         }
     }
@@ -77,5 +78,9 @@ class LunchService(
 
     private fun LunchInteractRequest.cancel(): LunchCommandResponse {
         return LunchCommandResponse.createCancel(summary)
+    }
+
+    private fun LunchInteractRequest.help(): LunchCommandResponse {
+        return LunchCommandResponse.createHelp(summary)
     }
 }

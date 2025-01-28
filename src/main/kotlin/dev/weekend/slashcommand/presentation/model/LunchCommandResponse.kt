@@ -40,6 +40,11 @@ data class LunchCommandResponse(
                             text = "같이 고를래요 👥",
                             value = LunchActionSummary.createBy(IN_CHANNEL).toJson(),
                         ),
+                        DoorayAction.createButton(
+                            name = LunchInteractionType.HELP,
+                            text = "더보기 🔍",
+                            value = LunchActionSummary.createBy(EPHEMERAL).toJson(),
+                        ),
                     )
                 )
             )
@@ -107,7 +112,6 @@ data class LunchCommandResponse(
         fun createLunchDetailForm(summary: LunchActionSummary) = LunchCommandResponse(
             text = "카테고리를 선택해주세요.",
             responseType = summary.responseType,
-//            replaceOriginal = true,
             attachments = listOf(
                 DoorayAttachment(
                     actions = LunchItemType.entries.map { lunchType ->
@@ -137,6 +141,21 @@ data class LunchCommandResponse(
             text = "다음에 다시 만나요 😵‍💫",
             responseType = summary.responseType,
             deleteOriginal = true,
+        )
+
+        fun createHelp(summary: LunchActionSummary) = LunchCommandResponse(
+            text = "이용해 주셔서 감사합니다 🥳",
+            responseType = summary.responseType,
+            attachments = listOf(
+                DoorayAttachment(
+                    title = "식당 전체 목록 보러가기 📍",
+                    titleLink = "https://naver.me/xRhSJQca",
+                ),
+                DoorayAttachment(
+                    title = "신규 식당 추가 또는 피드백 전송 💭",
+                    titleLink = "https://forms.gle/Ewrzmg7dJiZxBeeJA",
+                )
+            )
         )
     }
 }
