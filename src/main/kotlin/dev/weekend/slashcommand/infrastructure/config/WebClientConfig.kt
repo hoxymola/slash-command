@@ -17,8 +17,7 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
  */
 
 @Component
-class WebClientConfig(
-) {
+class WebClientConfig {
     @Bean
     fun getWebClient(): WebClient {
         val tcpClient = TcpClient.create()

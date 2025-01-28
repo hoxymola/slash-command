@@ -4,7 +4,7 @@ package dev.weekend.slashcommand.domain.enums
  * @author Jaeguk Cho
  */
 
-enum class AkinatorInteractionType: InteractionType {
+enum class AkinatorInteractionType : InteractionType {
     START_AKINATOR,
     CONTINUE_AKINATOR,
     CANCEL_AKINATOR,

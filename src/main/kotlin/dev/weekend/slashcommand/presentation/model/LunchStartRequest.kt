@@ -1,9 +1,8 @@
 package dev.weekend.slashcommand.presentation.model
 
 /**
- * @author Jaeguk Cho
+ * @author Yoohwa Cho
  */
-
-data class AkinatorStartRequest(
+data class LunchStartRequest(
     val userId: String,
 )

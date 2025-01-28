@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 class SlashCommandApplication
 
 fun main(args: Array<String>) {
-	runApplication<SlashCommandApplication>(*args)
+    runApplication<SlashCommandApplication>(*args)
 }

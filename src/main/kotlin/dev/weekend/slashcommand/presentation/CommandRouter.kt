@@ -22,6 +22,9 @@ class CommandRouter(
             POST("/mbti/interact", commandHandler::interactMbti)
             POST("/akinator", commandHandler::createAkinator)
             POST("/akinator/interact", commandHandler::interactAkinator)
+            POST("/lunch", commandHandler::startRecommendLunch)
+            POST("/lunch/interact", commandHandler::interactLunch)
+            POST("/lunch/new", commandHandler::createLunchItem)
         }
     }
 }

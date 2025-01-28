@@ -2,16 +2,15 @@ package dev.weekend.slashcommand.presentation
 
 import dev.weekend.slashcommand.application.AkinatorService
 import dev.weekend.slashcommand.application.BlindVoteService
+import dev.weekend.slashcommand.application.LunchService
 import dev.weekend.slashcommand.application.MbtiService
 import dev.weekend.slashcommand.presentation.model.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.server.ServerRequest
-import org.springframework.web.reactive.function.server.ServerResponse
+import org.springframework.web.reactive.function.server.*
+import org.springframework.web.reactive.function.server.ServerResponse.noContent
 import org.springframework.web.reactive.function.server.ServerResponse.ok
-import org.springframework.web.reactive.function.server.awaitBody
-import org.springframework.web.reactive.function.server.bodyValueAndAwait
 
 /**
  * @author Jaeguk Cho
@@ -22,6 +21,7 @@ class CommandHandler(
     private val blindVoteService: BlindVoteService,
     private val mbtiService: MbtiService,
     private val akinatorService: AkinatorService,
+    private val lunchService: LunchService,
 ) {
     suspend fun createBlindVote(request: ServerRequest): ServerResponse {
         return withContext(Dispatchers.Default) {
@@ -74,6 +74,33 @@ class CommandHandler(
 
             akinatorService.interactAkinator(interactRequest)
                 .let { ok().bodyValueAndAwait(it) }
+        }
+    }
+
+    suspend fun startRecommendLunch(request: ServerRequest): ServerResponse {
+        return withContext(Dispatchers.Default) {
+            val recommendRequest = request.awaitBody<LunchStartRequest>()
+
+            lunchService.start(recommendRequest)
+                .let { ok().bodyValueAndAwait(it) }
+        }
+    }
+
+    suspend fun interactLunch(request: ServerRequest): ServerResponse {
+        return withContext(Dispatchers.Default) {
+            val interactRequest = request.awaitBody<LunchInteractRequest>()
+
+            lunchService.interact(interactRequest)
+                .let { ok().bodyValueAndAwait(it) }
+        }
+    }
+
+    suspend fun createLunchItem(request: ServerRequest): ServerResponse {
+        return withContext(Dispatchers.Default) {
+            val createRequest = request.awaitBody<LunchCreateRequest>()
+
+            lunchService.createItems(createRequest)
+                .let { noContent().buildAndAwait() }
         }
     }
 }

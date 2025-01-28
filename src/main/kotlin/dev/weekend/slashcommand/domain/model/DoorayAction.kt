@@ -4,7 +4,6 @@ import dev.weekend.slashcommand.domain.enums.DoorayActionType.BUTTON
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.DEFAULT
 import dev.weekend.slashcommand.domain.enums.InteractionType
-import dev.weekend.slashcommand.domain.enums.VoteInteractionType
 
 /**
  * @author Jaeguk Cho

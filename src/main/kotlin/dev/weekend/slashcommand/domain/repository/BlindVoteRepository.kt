@@ -7,5 +7,4 @@ import org.springframework.data.jpa.repository.JpaRepository
  * @author Jaeguk Cho
  */
 
-interface BlindVoteRepository : JpaRepository<BlindVote, Long> {
-}
+interface BlindVoteRepository : JpaRepository<BlindVote, Long>
