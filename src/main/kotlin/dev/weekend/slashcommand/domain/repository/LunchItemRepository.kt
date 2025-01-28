@@ -10,10 +10,10 @@ import org.springframework.data.jpa.repository.Query
 interface LunchItemRepository : JpaRepository<LunchItem, Long> {
     @Query(
         """
-            select *
-            from lunch_item
-            order by Rand()
-            limit 1
+        select *
+        from lunch_item
+        order by Rand()
+        limit 1
         """,
         nativeQuery = true,
     )
@@ -21,12 +21,11 @@ interface LunchItemRepository : JpaRepository<LunchItem, Long> {
 
     @Query(
         """
-            select * from
-            (select *
-            from lunch_item
-            where type = :type) as t
-            order by Rand()
-            limit 1
+        select * 
+        from lunch_item 
+        where type = :type
+        order by rand()
+        limit 1
         """,
         nativeQuery = true,
     )
