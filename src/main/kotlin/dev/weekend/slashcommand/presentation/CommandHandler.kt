@@ -4,7 +4,6 @@ import dev.weekend.slashcommand.application.AkinatorService
 import dev.weekend.slashcommand.application.BlindVoteService
 import dev.weekend.slashcommand.application.LunchService
 import dev.weekend.slashcommand.application.MbtiService
-import dev.weekend.slashcommand.domain.extension.toJson
 import dev.weekend.slashcommand.presentation.model.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

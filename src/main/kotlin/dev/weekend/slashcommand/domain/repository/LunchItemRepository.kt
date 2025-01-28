@@ -1,7 +1,6 @@
 package dev.weekend.slashcommand.domain.repository
 
 import dev.weekend.slashcommand.domain.entity.LunchItem
-import dev.weekend.slashcommand.domain.enums.LunchItemType
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 

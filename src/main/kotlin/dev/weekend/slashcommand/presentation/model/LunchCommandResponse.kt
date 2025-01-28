@@ -75,7 +75,7 @@ data class LunchCommandResponse(
 
         fun createLunchResultBy(item: LunchItem, summary: LunchActionSummary) = LunchCommandResponse(
             text = "오늘 점심으로 `${item.name}`(${item.type.label}) 어떠세요?",
-            responseType = EPHEMERAL.value,
+            responseType = summary.responseType,
             replaceOriginal = true,
             attachments = listOf(
                 DoorayAttachment(

@@ -1,6 +1,5 @@
 package dev.weekend.slashcommand.application.model
 
-import dev.weekend.slashcommand.domain.entity.LunchItem
 import dev.weekend.slashcommand.domain.enums.LunchItemType
 
 /**
