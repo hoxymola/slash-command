@@ -106,7 +106,8 @@ data class LunchCommandResponse(
 
         fun createLunchDetailForm(summary: LunchActionSummary) = LunchCommandResponse(
             text = "카테고리를 선택해주세요.",
-            replaceOriginal = true,
+            responseType = summary.responseType,
+//            replaceOriginal = true,
             attachments = listOf(
                 DoorayAttachment(
                     actions = LunchItemType.entries.map { lunchType ->
