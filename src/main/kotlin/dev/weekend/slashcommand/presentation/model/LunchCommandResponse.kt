@@ -33,12 +33,12 @@ data class LunchCommandResponse(
                         DoorayAction.createButton(
                             name = LunchInteractionType.START,
                             text = "혼자 고를래요 👤",
-                            value = LunchActionSummary.createByResponseType(EPHEMERAL)
+                            value = LunchActionSummary.createBy(EPHEMERAL).toJson()
                         ),
                         DoorayAction.createButton(
                             name = LunchInteractionType.START,
                             text = "같이 고를래요 👥",
-                            value = LunchActionSummary.createByResponseType(IN_CHANNEL),
+                            value = LunchActionSummary.createBy(IN_CHANNEL).toJson(),
                         ),
                     )
                 )
@@ -87,7 +87,7 @@ data class LunchCommandResponse(
                         DoorayAction.createButton(
                             name = LunchInteractionType.CONFIRM_RECOMMEND,
                             text = "맘에 들어요 😋",
-                            value = LunchActionSummary.addItemNo(summary, item.no),
+                            value = summary.changeItemNo(item.no).toJson(),
                         ),
                         DoorayAction.createButton(
                             name = LunchInteractionType.RECOMMEND_AGAIN,
@@ -97,7 +97,7 @@ data class LunchCommandResponse(
                         DoorayAction.createButton(
                             name = LunchInteractionType.RESTART,
                             text = "처음으로 😵‍💫",
-                            value = LunchActionSummary.createByResponseType(summary.convertResponseType())
+                            value = LunchActionSummary.createBy(summary.convertResponseType()).toJson()
                         ),
                     )
                 )
@@ -113,7 +113,7 @@ data class LunchCommandResponse(
                         DoorayAction.createButton(
                             name = LunchInteractionType.GET_RECOMMENDATION,
                             text = lunchType.label,
-                            value = LunchActionSummary.addItemType(summary, lunchType),
+                            value = summary.changeItemType(lunchType).toJson(),
                         )
                     }
                 ),

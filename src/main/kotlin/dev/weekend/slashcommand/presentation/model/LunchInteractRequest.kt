@@ -17,5 +17,5 @@ data class LunchInteractRequest(
 ) {
     val userId = user.id.toLong()
     val summary: LunchActionSummary
-        get() = actionValue.takeIf { it.isNotBlank() }?.toModelOrNull<LunchActionSummary>() ?: LunchActionSummary()
+        get() = actionValue.toModelOrNull<LunchActionSummary>() ?: LunchActionSummary()
 }
