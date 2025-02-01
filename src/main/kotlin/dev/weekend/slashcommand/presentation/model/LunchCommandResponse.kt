@@ -1,12 +1,16 @@
 package dev.weekend.slashcommand.presentation.model
 
 import dev.weekend.slashcommand.application.model.LunchActionSummary
+import dev.weekend.slashcommand.domain.constant.LunchConstant.HAPPY_EMOJIS
+import dev.weekend.slashcommand.domain.constant.LunchConstant.RESET_EMOJIS
+import dev.weekend.slashcommand.domain.constant.LunchConstant.SAD_EMOJIS
 import dev.weekend.slashcommand.domain.entity.LunchItem
 import dev.weekend.slashcommand.domain.enums.DoorayButtonStyle.PRIMARY
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.EPHEMERAL
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType.IN_CHANNEL
 import dev.weekend.slashcommand.domain.enums.LunchInteractionType
 import dev.weekend.slashcommand.domain.enums.LunchItemType
+import dev.weekend.slashcommand.domain.extension.getRandom
 import dev.weekend.slashcommand.domain.extension.toJson
 import dev.weekend.slashcommand.domain.model.DoorayAction
 import dev.weekend.slashcommand.domain.model.DoorayAttachment
@@ -78,7 +82,13 @@ data class LunchCommandResponse(
             )
         )
 
-        fun createLunchResultBy(item: LunchItem, summary: LunchActionSummary) = LunchCommandResponse(
+        fun createLunchResultBy(item: LunchItem, summary: LunchActionSummary): LunchCommandResponse {
+            return if (summary.isInChannel()) createPublicLunchResultBy(item, summary)
+            else createPrivateLunchResultBy(item, summary)
+        }
+
+        //혼자 고르기 할때 추천
+        private fun createPrivateLunchResultBy(item: LunchItem, summary: LunchActionSummary) = LunchCommandResponse(
             text = "오늘 점심으로 `${item.name}`(${item.type.label}) 어떠세요?",
             responseType = summary.responseType,
             replaceOriginal = true,
@@ -91,17 +101,67 @@ data class LunchCommandResponse(
                     actions = listOfNotNull(
                         DoorayAction.createButton(
                             name = LunchInteractionType.CONFIRM_RECOMMEND,
-                            text = "맘에 들어요 😋",
+                            text = "공유하기 ${HAPPY_EMOJIS.getRandom()}",
                             value = summary.changeItemNo(item.no).toJson(),
                         ),
                         DoorayAction.createButton(
                             name = LunchInteractionType.RECOMMEND_AGAIN,
-                            text = "${if (summary.itemType.isNotBlank()) item.type.label + " " else ""}다시 뽑기 🤨",
+                            text = "${if (summary.itemType.isNotBlank()) item.type.label + " " else ""}다시 뽑기 ${
+                                SAD_EMOJIS.getRandom(
+                                    1
+                                )
+                            }",
                             value = summary.toJson(),
                         ),
                         DoorayAction.createButton(
                             name = LunchInteractionType.RESTART,
-                            text = "처음으로 😵‍💫",
+                            text = "처음으로 ${RESET_EMOJIS.getRandom()}",
+                            value = LunchActionSummary.createBy(summary.convertResponseType()).toJson()
+                        ),
+                    )
+                )
+            )
+        )
+
+        //같이 고르기 할때 추천
+        private fun createPublicLunchResultBy(item: LunchItem, summary: LunchActionSummary) = LunchCommandResponse(
+            text = "오늘 점심으로 `${item.name}`(${item.type.label}) 어떠세요?",
+            responseType = summary.responseType,
+            replaceOriginal = true,
+            attachments = listOf(
+                DoorayAttachment(
+                    actions = listOfNotNull(
+                        DoorayAction.createButton(
+                            name = LunchInteractionType.LIKE,
+                            text = "좋아요 👍",
+                            value = summary.likeItem().toJson()
+                        ),
+                        DoorayAction.createButton(
+                            name = LunchInteractionType.LIKE,
+                            text = "싫어요 👎",
+                            value = summary.dislikeItem().toJson()
+                        ),
+                    )
+                ),
+                DoorayAttachment(
+                    title = "${item.name} - 메뉴 보러가기",
+                    titleLink = item.link,
+                ),
+                DoorayAttachment(
+                    actions = listOfNotNull(
+                        DoorayAction.createButton(
+                            name = LunchInteractionType.CONFIRM_RECOMMEND,
+                            text = "확정하기 ${HAPPY_EMOJIS.getRandom()}",
+                            value = summary.changeItemNo(item.no).toJson(),
+                        ),
+                        DoorayAction.createButton(
+                            name = LunchInteractionType.RECOMMEND_AGAIN,
+                            text = "${if (summary.itemType.isNotBlank()) item.type.label + " " else ""}다시 뽑기 ${SAD_EMOJIS.getRandom()}",
+                            value = summary.resetLike().toJson(),
+                        ),
+                        DoorayAction.createButton(
+                            name = LunchInteractionType.RESTART,
+                            text = "처음으로 ${RESET_EMOJIS.getRandom()}",
                             value = LunchActionSummary.createBy(summary.convertResponseType()).toJson()
                         ),
                     )
@@ -117,7 +177,7 @@ data class LunchCommandResponse(
                     actions = LunchItemType.entries.map { lunchType ->
                         DoorayAction.createButton(
                             name = LunchInteractionType.GET_RECOMMENDATION,
-                            text = lunchType.label,
+                            text = "${lunchType.label}${lunchType.getEmoji()}",
                             value = summary.changeItemType(lunchType).toJson(),
                         )
                     }

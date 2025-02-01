@@ -12,5 +12,6 @@ enum class LunchInteractionType : InteractionType {
     RESTART, //처음으로 가기
     CANCEL, //취소하기
     HELP, //도움말
+    LIKE, //같이고르기 - 좋아요, 싫어요 클릭 시
     ;
 }

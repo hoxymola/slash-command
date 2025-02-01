@@ -11,6 +11,7 @@ data class LunchActionSummary(
 ) {
     var itemNo: String = ""
     var itemType: String = ""
+    var liked: String = ""
 
     fun changeItemNo(itemNo: Long): LunchActionSummary {
         return this.apply {
@@ -21,6 +22,24 @@ data class LunchActionSummary(
     fun changeItemType(itemType: LunchItemType): LunchActionSummary {
         return this.apply {
             this.itemType = itemType.name
+        }
+    }
+
+    fun likeItem(): LunchActionSummary {
+        return this.apply {
+            this.liked = "Y"
+        }
+    }
+
+    fun dislikeItem(): LunchActionSummary {
+        return this.apply {
+            this.liked = "N"
+        }
+    }
+
+    fun resetLike(): LunchActionSummary {
+        return this.apply {
+            this.liked = ""
         }
     }
 
