@@ -1,6 +1,7 @@
 package dev.weekend.slashcommand.presentation.model
 
 import dev.weekend.slashcommand.application.model.LunchActionSummary
+import dev.weekend.slashcommand.domain.constant.LunchConstant.CONFIRM_LIST
 import dev.weekend.slashcommand.domain.constant.LunchConstant.HAPPY_EMOJIS
 import dev.weekend.slashcommand.domain.constant.LunchConstant.RESET_EMOJIS
 import dev.weekend.slashcommand.domain.constant.LunchConstant.SAD_EMOJIS
@@ -185,7 +186,14 @@ data class LunchCommandResponse(
             ),
         )
 
-        fun createLunchConfirmResult(item: LunchItem) = LunchCommandResponse(
+        fun createLunchConfirmResult(item: LunchItem, summary: LunchActionSummary): LunchCommandResponse {
+            return if (summary.isInChannel()) {
+                createPublicLunchConfirmResult(item)
+            } else createPrivateLunchConfirmResult(item)
+        }
+
+        //혼자 고르기 할때 공유하기
+        private fun createPrivateLunchConfirmResult(item: LunchItem) = LunchCommandResponse(
             text = "오늘 점심으로 `${item.name}`(${item.type.label}) 어떠세요? 🤔",
             responseType = IN_CHANNEL.value,
             deleteOriginal = true,
@@ -197,14 +205,27 @@ data class LunchCommandResponse(
             )
         )
 
+        //같이 고르기 할때 확정하기
+        private fun createPublicLunchConfirmResult(item: LunchItem) = LunchCommandResponse(
+            text = CONFIRM_LIST.shuffled().first(),
+            responseType = IN_CHANNEL.value,
+            deleteOriginal = true,
+            attachments = listOf(
+                DoorayAttachment(
+                    title = "${item.name} - 메뉴 보러가기",
+                    titleLink = item.link,
+                ),
+            )
+        )
+
         fun createCancel(summary: LunchActionSummary) = LunchCommandResponse(
-            text = "다음에 다시 만나요 😵‍💫",
+            text = "다음에 다시 만나요 ${RESET_EMOJIS.getRandom()}",
             responseType = summary.responseType,
             deleteOriginal = true,
         )
 
         fun createHelp(summary: LunchActionSummary) = LunchCommandResponse(
-            text = "이용해 주셔서 감사합니다 🥳",
+            text = "이용해 주셔서 감사합니다 ${HAPPY_EMOJIS.getRandom()}",
             responseType = summary.responseType,
             attachments = listOf(
                 DoorayAttachment(

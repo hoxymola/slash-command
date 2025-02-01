@@ -69,7 +69,7 @@ class LunchService(
 
     private fun LunchInteractRequest.confirm(): LunchCommandResponse {
         val item = lunchItemRepository.findByIdOrNull(summary.convertItemNo()) ?: throw InternalError()
-        return LunchCommandResponse.createLunchConfirmResult(item)
+        return LunchCommandResponse.createLunchConfirmResult(item, summary)
     }
 
     private fun LunchInteractRequest.startRecommendation(): LunchCommandResponse {
