@@ -178,7 +178,7 @@ data class LunchCommandResponse(
                     actions = LunchItemType.entries.map { lunchType ->
                         DoorayAction.createButton(
                             name = LunchInteractionType.GET_RECOMMENDATION,
-                            text = "${lunchType.label}${lunchType.getEmoji()}",
+                            text = "${lunchType.label} ${lunchType.getEmoji()}",
                             value = summary.changeItemType(lunchType).toJson(),
                         )
                     }
