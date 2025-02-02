@@ -130,20 +130,20 @@ data class LunchCommandResponse(
             responseType = summary.responseType,
             replaceOriginal = true,
             attachments = listOf(
-                DoorayAttachment(
-                    actions = listOfNotNull(
-                        DoorayAction.createButton(
-                            name = LunchInteractionType.LIKE,
-                            text = "좋아요 👍",
-                            value = summary.likeItem().toJson()
-                        ),
-                        DoorayAction.createButton(
-                            name = LunchInteractionType.LIKE,
-                            text = "싫어요 👎",
-                            value = summary.dislikeItem().toJson()
-                        ),
-                    )
-                ),
+//                DoorayAttachment(
+//                    actions = listOfNotNull(
+//                        DoorayAction.createButton(
+//                            name = LunchInteractionType.LIKE,
+//                            text = "좋아요 👍",
+//                            value = summary.likeItem().toJson()
+//                        ),
+//                        DoorayAction.createButton(
+//                            name = LunchInteractionType.LIKE,
+//                            text = "싫어요 👎",
+//                            value = summary.dislikeItem().toJson()
+//                        ),
+//                    )
+//                ),
                 DoorayAttachment(
                     title = "${item.name} - 메뉴 보러가기",
                     titleLink = item.link,
