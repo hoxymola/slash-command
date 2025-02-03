@@ -108,9 +108,7 @@ data class LunchCommandResponse(
                         DoorayAction.createButton(
                             name = LunchInteractionType.RECOMMEND_AGAIN,
                             text = "${if (summary.itemType.isNotBlank()) item.type.label + " " else ""}다시 뽑기 ${
-                                SAD_EMOJIS.getRandom(
-                                    1
-                                )
+                                SAD_EMOJIS.getRandom()
                             }",
                             value = summary.toJson(),
                         ),
