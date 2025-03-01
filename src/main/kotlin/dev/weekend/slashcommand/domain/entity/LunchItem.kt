@@ -14,11 +14,14 @@ data class LunchItem(
     @Column(name = "lunch_item_no")
     val no: Long = 0,
 
+    @Column(name = "lunch_name")
     val name: String = "",
 
+    @Column(name = "lunch_link")
     val link: String = "",
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "lunch_item_type")
     val type: LunchItemType = LunchItemType.ETC,
 ) : BaseTimeEntity() {
     var likeCount: Int = 0
