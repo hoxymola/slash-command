@@ -1,8 +1,10 @@
 package dev.weekend.slashcommand.application
 
 import dev.weekend.slashcommand.domain.entity.LunchItem
+import dev.weekend.slashcommand.domain.entity.LunchRecommendHistory
 import dev.weekend.slashcommand.domain.enums.LunchInteractionType
 import dev.weekend.slashcommand.domain.repository.LunchItemRepository
+import dev.weekend.slashcommand.domain.repository.LunchRecommendHistoryRepository
 import dev.weekend.slashcommand.presentation.model.LunchCommandResponse
 import dev.weekend.slashcommand.presentation.model.LunchCreateRequest
 import dev.weekend.slashcommand.presentation.model.LunchInteractRequest
@@ -18,12 +20,17 @@ import org.springframework.transaction.support.TransactionTemplate
 @Service
 class LunchService(
     private val lunchItemRepository: LunchItemRepository,
+    private val lunchRecommendHistoryRepository: LunchRecommendHistoryRepository,
     private val transactionTemplate: TransactionTemplate,
 ) {
     fun start(
         request: LunchStartRequest,
     ): LunchCommandResponse {
-        return LunchCommandResponse.createLunchStartFormBy()
+        val history = LunchRecommendHistory.createBy(
+            userId = request.userId,
+        ).also { lunchRecommendHistoryRepository.save(it) }
+
+        return LunchCommandResponse.createLunchStartFormBy(history.no)
     }
 
     fun interact(request: LunchInteractRequest): LunchCommandResponse {
@@ -68,12 +75,23 @@ class LunchService(
     }
 
     private fun LunchInteractRequest.confirm(): LunchCommandResponse {
-        val item = lunchItemRepository.findByIdOrNull(summary.convertItemNo()) ?: throw InternalError()
-        return LunchCommandResponse.createLunchConfirmResult(item, summary)
+        return transactionTemplate.execute {
+            val item = lunchItemRepository.findByIdOrNull(summary.convertItemNo()) ?: throw InternalError()
+
+            lunchRecommendHistoryRepository.findByIdOrNull(summary.historyNo)
+                ?.apply { updateLunchItem(item) }
+
+            LunchCommandResponse.createLunchConfirmResult(item, summary)
+        } ?: throw IllegalStateException()
     }
 
     private fun LunchInteractRequest.startRecommendation(): LunchCommandResponse {
-        return LunchCommandResponse.createLunchFormBy(summary)
+        return transactionTemplate.execute {
+            lunchRecommendHistoryRepository.findByIdOrNull(summary.historyNo)
+                ?.apply { updateLunchSelectType(summary.responseType) }
+
+            LunchCommandResponse.createLunchFormBy(summary)
+        } ?: throw IllegalStateException()
     }
 
     private fun LunchInteractRequest.cancel(): LunchCommandResponse {

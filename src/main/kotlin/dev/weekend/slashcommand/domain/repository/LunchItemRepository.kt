@@ -23,7 +23,7 @@ interface LunchItemRepository : JpaRepository<LunchItem, Long> {
         """
         select * 
         from lunch_item 
-        where type = :type
+        where lunch_item_type = :type
         order by rand()
         limit 1
         """,
