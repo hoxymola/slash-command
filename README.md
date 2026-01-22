@@ -14,6 +14,7 @@
 <img width="547" alt="image" src="https://github.com/user-attachments/assets/2695116e-0079-40e4-a22b-7f0b4c5633d3" />
 <img width="549" alt="image" src="https://github.com/user-attachments/assets/f8056b9d-c7ce-4471-9387-5d7abb4c9996" />
 <img width="548" alt="image" src="https://github.com/user-attachments/assets/556300cd-9f35-489d-ada3-9391fb25b733" />
+<img width="539" alt="image" src="https://github.com/user-attachments/assets/2a766795-68d9-4793-80ba-59c747c79b67" />
 
 ## 3. 아키네이터
 <img width="556" alt="image" src="https://github.com/user-attachments/assets/26b115b0-002e-46b0-9a35-06b319ff19c1" />
