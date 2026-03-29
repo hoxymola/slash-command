@@ -29,7 +29,9 @@ data class LunchCommandResponse(
     val creatorId: Long? = null,
 ) {
     companion object {
-        fun createLunchStartFormBy() = LunchCommandResponse(
+        fun createLunchStartFormBy(
+            historyNo: Long,
+        ) = LunchCommandResponse(
             text = "오늘의 점심 메뉴는? 😮",
             responseType = EPHEMERAL.value,
             attachments = listOf(
@@ -38,26 +40,35 @@ data class LunchCommandResponse(
                         DoorayAction.createButton(
                             name = LunchInteractionType.START,
                             text = "혼자 고를래요 👤",
-                            value = LunchActionSummary.createBy(EPHEMERAL).toJson()
+                            value = LunchActionSummary.createBy(
+                                historyNo = historyNo,
+                                responseType = EPHEMERAL,
+                            ).toJson(),
                         ),
                         DoorayAction.createButton(
                             name = LunchInteractionType.START,
                             text = "같이 고를래요 👥",
-                            value = LunchActionSummary.createBy(IN_CHANNEL).toJson(),
+                            value = LunchActionSummary.createBy(
+                                historyNo = historyNo,
+                                responseType = IN_CHANNEL,
+                            ).toJson(),
                         ),
                         DoorayAction.createButton(
                             name = LunchInteractionType.HELP,
                             text = "더보기 🔍",
-                            value = LunchActionSummary.createBy(EPHEMERAL).toJson(),
+                            value = LunchActionSummary.createBy(
+                                historyNo = historyNo,
+                                responseType = EPHEMERAL,
+                            ).toJson(),
                         ),
-                    )
-                )
+                    ),
+                ),
             )
         )
 
         fun createLunchFormBy(summary: LunchActionSummary) = LunchCommandResponse(
             text = "오늘의 점심 메뉴는? 😮",
-            responseType = summary.responseType,
+            responseType = summary.responseType.value,
             deleteOriginal = if (summary.isInChannel()) true else null,
             attachments = listOf(
                 DoorayAttachment(
@@ -91,7 +102,7 @@ data class LunchCommandResponse(
         //혼자 고르기 할때 추천
         private fun createPrivateLunchResultBy(item: LunchItem, summary: LunchActionSummary) = LunchCommandResponse(
             text = "오늘 점심으로 `${item.name}`(${item.type.label}) 어떠세요?",
-            responseType = summary.responseType,
+            responseType = summary.responseType.value,
             replaceOriginal = true,
             attachments = listOf(
                 DoorayAttachment(
@@ -115,7 +126,10 @@ data class LunchCommandResponse(
                         DoorayAction.createButton(
                             name = LunchInteractionType.RESTART,
                             text = "처음으로 ${RESET_EMOJIS.getRandom()}",
-                            value = LunchActionSummary.createBy(summary.convertResponseType()).toJson()
+                            value = LunchActionSummary.createBy(
+                                historyNo = summary.historyNo,
+                                responseType = summary.convertResponseType(),
+                            ).toJson(),
                         ),
                     )
                 )
@@ -125,23 +139,23 @@ data class LunchCommandResponse(
         //같이 고르기 할때 추천
         private fun createPublicLunchResultBy(item: LunchItem, summary: LunchActionSummary) = LunchCommandResponse(
             text = "오늘 점심으로 `${item.name}`(${item.type.label}) 어떠세요?",
-            responseType = summary.responseType,
+            responseType = summary.responseType.value,
             replaceOriginal = true,
             attachments = listOf(
-//                DoorayAttachment(
-//                    actions = listOfNotNull(
-//                        DoorayAction.createButton(
-//                            name = LunchInteractionType.LIKE,
-//                            text = "좋아요 👍",
-//                            value = summary.likeItem().toJson()
-//                        ),
-//                        DoorayAction.createButton(
-//                            name = LunchInteractionType.LIKE,
-//                            text = "싫어요 👎",
-//                            value = summary.dislikeItem().toJson()
-//                        ),
-//                    )
-//                ),
+                //                DoorayAttachment(
+                //                    actions = listOfNotNull(
+                //                        DoorayAction.createButton(
+                //                            name = LunchInteractionType.LIKE,
+                //                            text = "좋아요 👍",
+                //                            value = summary.likeItem().toJson()
+                //                        ),
+                //                        DoorayAction.createButton(
+                //                            name = LunchInteractionType.LIKE,
+                //                            text = "싫어요 👎",
+                //                            value = summary.dislikeItem().toJson()
+                //                        ),
+                //                    )
+                //                ),
                 DoorayAttachment(
                     title = "${item.name} - 메뉴 보러가기",
                     titleLink = item.link,
@@ -161,7 +175,10 @@ data class LunchCommandResponse(
                         DoorayAction.createButton(
                             name = LunchInteractionType.RESTART,
                             text = "처음으로 ${RESET_EMOJIS.getRandom()}",
-                            value = LunchActionSummary.createBy(summary.convertResponseType()).toJson()
+                            value = LunchActionSummary.createBy(
+                                historyNo = summary.historyNo,
+                                responseType = summary.convertResponseType(),
+                            ).toJson(),
                         ),
                     )
                 )
@@ -170,7 +187,7 @@ data class LunchCommandResponse(
 
         fun createLunchDetailForm(summary: LunchActionSummary) = LunchCommandResponse(
             text = "카테고리를 선택해주세요.",
-            responseType = summary.responseType,
+            responseType = summary.responseType.value,
             attachments = listOf(
                 DoorayAttachment(
                     actions = LunchItemType.entries.map { lunchType ->
@@ -218,13 +235,13 @@ data class LunchCommandResponse(
 
         fun createCancel(summary: LunchActionSummary) = LunchCommandResponse(
             text = "다음에 다시 만나요 ${RESET_EMOJIS.getRandom()}",
-            responseType = summary.responseType,
+            responseType = summary.responseType.value,
             deleteOriginal = true,
         )
 
         fun createHelp(summary: LunchActionSummary) = LunchCommandResponse(
             text = "이용해 주셔서 감사합니다 ${HAPPY_EMOJIS.getRandom()}",
-            responseType = summary.responseType,
+            responseType = summary.responseType.value,
             attachments = listOf(
                 DoorayAttachment(
                     title = "식당 전체 목록 보러가기 📍",

@@ -1,13 +1,16 @@
 package dev.weekend.slashcommand.application.model
 
 import dev.weekend.slashcommand.domain.enums.DoorayResponseType
+import dev.weekend.slashcommand.domain.enums.DoorayResponseType.EPHEMERAL
+import dev.weekend.slashcommand.domain.enums.DoorayResponseType.IN_CHANNEL
 import dev.weekend.slashcommand.domain.enums.LunchItemType
 
 /**
  * @author Yoohwa Cho
  */
 data class LunchActionSummary(
-    val responseType: String = "",
+    val historyNo: Long = 0,
+    val responseType: DoorayResponseType = EPHEMERAL,
 ) {
     var itemNo: String = ""
     var itemType: String = ""
@@ -44,12 +47,12 @@ data class LunchActionSummary(
     }
 
     fun isInChannel(): Boolean {
-        return responseType == DoorayResponseType.IN_CHANNEL.value
+        return responseType == IN_CHANNEL
     }
 
     fun convertResponseType(): DoorayResponseType {
-        return if (responseType == DoorayResponseType.IN_CHANNEL.value) DoorayResponseType.IN_CHANNEL
-        else DoorayResponseType.EPHEMERAL
+        return if (responseType == IN_CHANNEL) IN_CHANNEL
+        else EPHEMERAL
     }
 
     fun convertItemNo(): Long {
@@ -61,8 +64,12 @@ data class LunchActionSummary(
     }
 
     companion object {
-        fun createBy(responseType: DoorayResponseType): LunchActionSummary = LunchActionSummary(
-            responseType = responseType.value,
+        fun createBy(
+            historyNo: Long,
+            responseType: DoorayResponseType,
+        ): LunchActionSummary = LunchActionSummary(
+            historyNo = historyNo,
+            responseType = responseType,
         )
     }
 }
